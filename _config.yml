@@ -11,7 +11,7 @@ safe: true
 
 
 # edit here to achieve your personal greatness
-url: http://jtomori.github.io/
+url: https://jtomori.github.io/
 baseurl: /
 title: Juraj Tomori
 author: Juraj Tomori
@@ -21,6 +21,7 @@ github: jtomori # username
 email: tomori.juraj@gmail.com
 linkedin: juraj-tomori
 youtube: seals77
+wordpress: jurajtomori
 google_analytics: UA-136248017-1
 
 
