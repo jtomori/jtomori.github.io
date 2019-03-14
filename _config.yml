@@ -1,0 +1,28 @@
+# top level stuff you probably don't need to touch
+highlighter: rouge
+markdown: kramdown
+rdiscount:
+  extensions: [smart]
+permalink: /:title.html
+paginate: 5
+plugins: [jekyll-paginate]
+port: 3000
+safe: true
+
+
+# edit here to achieve your personal greatness
+url: http://jtomori.github.io/
+baseurl: /
+title: Juraj Tomori
+author: Juraj Tomori
+description: Personal website and resume
+avatar: profile.jpg
+github: jtomori # username
+email: tomori.juraj@gmail.com
+linkedin: juraj-tomori
+youtube: seals77
+google_analytics: UA-136248017-1
+
+
+# needed for travis-ci build
+exclude: [vendor]
