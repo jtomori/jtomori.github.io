@@ -86,3 +86,6 @@ If higher precision is needed in VEX, then you need to resort to emulating doubl
 However with the latest release adding support for 64 bits in CHOPs we can hope that 64 bit support will be added into other areas of Houdini in the following versions :)
 
 Hope you will find this summary helpful. If you will find any mistakes or will think of any improvements, please let me know :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

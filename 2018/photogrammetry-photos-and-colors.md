@@ -160,3 +160,6 @@ _(Although Alice Vision Meshroom [doesn't seem to use image masks](https://githu
 So this is end of this post. After this you should have a brief understanding of our workflow. The next step will be the photogrammetry itself.
 
 Hope you enjoyed reading it and if you spotted some mistakes or have suggestions for improving our pipeline then do not hesitate to get in touch :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

@@ -63,3 +63,6 @@ Here is excerpt from their site:
 > ACM SIGGRAPH has participated in the ACM open access program since it was founded in 2015. As a result, [SIGGRAPH](http://siggraph.org/current-conference) conference content from 2015 forward is available through this program.
 > 
 > For both SIGGRAPH and SIGGRAPH Asia, conference content is freely accessible in the [ACM Digital Library](http://dl.acm.org/) for a one-month period that begins two weeks before each conference, and ends a week after it concludes. Following this one-month "free access" window, the content is available at no cost in perpetuity, exclusively through the open access links on the page below. ACM SIGGRAPH also provides the same open access to [sponsored and co-sponsored conference content](http://www.siggraph.org/learn/sponsored-conference-content) in the ACM Digital Library.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

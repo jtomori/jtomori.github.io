@@ -25,3 +25,6 @@ Those commands will merge tiles in vertical direction and then merge all vertica
 In shading I also used following textures available from NASA: specular mask, clouds mask, land and ocean displacement. I also overlayed earth geometry with VDB volume to create atmosphere.
 
 \[caption id="attachment\_457" align="alignnone" width="1280"\]![test_zem_11.jpg](images/test_zem_11.jpg) final result\[/caption\]
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

@@ -49,3 +49,6 @@ The projects were done in three.js and A-Frame:
 Those tests could be improved by rendering something more interesting than the default Mandelbulb, also the shading could be better than the greyscale phong model, also orbit traps could add some colorful patterns :)
 
 So this is it for now. I plan to use this as a platform for prototyping and hope to make some more interesting things run in my web browser!
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

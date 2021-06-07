@@ -28,3 +28,6 @@ Then type _jt\_facing;_ in your script editor, or in MEL command line, or add it
 select -r $sel\[0\]; // select colored object string $pVtxTool = \`artAttrColorPerVertexToolScript 4\`; // initialize the paintVertex tool artAttrPaintVertexCtx -e -sao "smooth" $pVtxTool; // set it to smooth for ($i = 0 ; $i <= 6 ; $i++) { artAttrPaintVertexCtx -e -clear $pVtxTool; // smooth vertex colors }
 
 select -r $sel; // restore selection setToolTo $prevTool; // restore tool float $end = \`timerX\`; // end timer print ("\\nnumber of processed vertices: " + $nvtx\[0\] + "\\ntime to execute: " + ($end - $start) + "sec"); // print stats } \[/code\]
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

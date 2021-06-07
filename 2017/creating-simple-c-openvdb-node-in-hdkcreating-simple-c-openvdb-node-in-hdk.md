@@ -273,3 +273,6 @@ That should be all. After reading this tutorial you should be able to successful
 ### Thanks :)
 
 I would like to thank [Ostap Pochtarenko](https://github.com/RiLights/) for support, good ideas and helping with code :) Also to helpful posts at sidefx and odforce forums and [Deborah R Fowler's](http://www.deborahrfowler.com/C++Resources/HDK-Resources.html) great resources.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

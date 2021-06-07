@@ -115,3 +115,6 @@ During the production we had one Houdini scene with all assets in it. After they
 So this is how our setup looked like. Hope you found it helpful and let me know if you have ideas for improvements :)
 
 You can download the [Houdini Digital Asset here](https://drive.google.com/open?id=1tmEmc-Jk2u52NLpAqKa-ES1L35mi6AST).
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

@@ -101,3 +101,6 @@ With that command you can get value of _MYVAR1_ in any python context inside you
 Those setups can be very useful, it might take a bit of time when setting them up for the first time but it will definitely pay off later on. Especially when your setups will get more complicated :) You also then need to manage your scripts somehow, because your variables will not work when houdini project file will be run in another environment (without executing your starting script). This happens often when running scripts from another user, machine, on renderfarm etc.
 
 Hope you find it helpful, if you spot any mistakes please let me know so that I can correct them.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

@@ -51,3 +51,6 @@ $ tail -f cluster-manager.log
 $ tail -f node-manager.log
 
 That should be it, enjoy rendering :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

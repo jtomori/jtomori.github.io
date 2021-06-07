@@ -88,3 +88,6 @@ Saving _hip_ files as text seems to be easily done through _File -> Save as text
 This post was inspired by a workshop by Daniel Stern, thanks for the tips :) You can find more information about asset versioning in Houdini docs: [namespaces](http://www.sidefx.com/docs/houdini/assets/namespaces.html), [versioning](http://www.sidefx.com/docs/houdini/assets/versioning_systems.html), [files as text](http://www.sidefx.com/docs/houdini/assets/textfiles.html) .
 
 Thanks for reading :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

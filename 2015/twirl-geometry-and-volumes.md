@@ -31,3 +31,6 @@ And it worked quite well on geometry. So next step was to make it work on volume
 This is just basic deformer that twirls volume by center of coordinate system and can be extended (control position of twirl...) It has two "modes" one is by specifying Angle and Frame End parameters to do animation, or just by setting animated Angle value and setting Frame End to 1. I also added scale option which will also "suck" or expand volume. If you want to deform multiple volumes (rest, Cd...) just replicate last line with coresponding volume name.
 
 Also note that when deforming VDB volumes you have to first expand voxels, then perform deformation and then prune empty voxels.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

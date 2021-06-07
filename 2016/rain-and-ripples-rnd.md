@@ -66,3 +66,6 @@ And that's it :) If you have any suggestions on how to improve this workflow or 
 I developed this effect during my stay at Platige Image. There are really cool guys and I thank them for giving me help and space to develop this effect!
 
 [Download scene file.](https://drive.google.com/open?id=0B0hpa2flKntobWE4ZTlsR1Nsd28)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

@@ -84,3 +84,6 @@ So copy _numpy_ folder from _C:\\Program Files\\Side Effects Software\\Houdini 1
 After that you should be able to "_import numpy"_ inside of Nuke's Script Editor without any issues.
 
 Hope you found this helpful, thanks for reading all the way down :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

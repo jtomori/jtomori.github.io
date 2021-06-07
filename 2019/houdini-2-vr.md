@@ -65,3 +65,6 @@ Another issue that is present in the current workflow are short black-outs in HM
 Those are the main current issues which are result of my initial approach. I think that it could be solved by better communication between Houdini and the web browser. I was thinking about giving a try using websockets. I will try to figure out if it could establish a  communication channel for transferring HDR image data and to update VR texture on browser side exactly when needed. I will also try to minimize short freezes between texture replacement. It seems that it cannot be totally suppressed as it takes some time to upload a texture into GPU memory, but maybe something can be done about it - fading to black and back to new texture or something like that. Testing will show :)
 
 Thanks for reading all the way down and I hope that you will find this project useful :) Feel free to contribute to it by building on it or suggesting a workflow which would solve some of the problems.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

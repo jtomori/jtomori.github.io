@@ -22,3 +22,6 @@ And this is also one of the motivations to host it on a git: similar-minded peop
 I tried to make an easy system for adding new entries - simply add them into a json library file and the page will be automatically updated. More info about that in the repo.
 
 I hope that you will find this resource useful :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

@@ -21,3 +21,6 @@ As it turns out there are some handy modules coming with Houdini, but they can b
 I created a GitHub repository hosting the [generated docs](https://jtomori.github.io/houdini_additional_python_docs/) and written down the process of [generating them](https://github.com/jtomori/houdini_additional_python_docs/).
 
 Happy reading :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

@@ -75,3 +75,6 @@ I would like to thank Platige Image for giving me help and space for developing 
 If you noticed any mistakes or you know any improvements, please let me know.
 
 And the promised scene file is [here](https://goo.gl/9o9BlU).
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

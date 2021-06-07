@@ -47,3 +47,6 @@ else v@restP = lerp(v@restP,v@P,vol\_change); // mix restP with P by change in v
  
 
 \[caption id="attachment\_517" align="alignnone" width="738"\]![nodes_sop](images/nodes_sop.jpg) Nodes inside **SOP Solver**\[/caption\]
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

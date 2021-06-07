@@ -87,3 +87,6 @@ In this shading setup we are going to put things that I talked about before tog
 And finally here are results. I also tried _alFlowNoise_ and _alGaborNoise_ which produced interesting looks. Those and more great shaders can be [downloaded here](http://anderslanglands.com/).
 
 ![displ_1](images/displ_1.jpg)![displ_2](images/displ_2.jpg)![displ_3](images/displ_3.jpg)![displ_4](images/displ_4.jpg)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

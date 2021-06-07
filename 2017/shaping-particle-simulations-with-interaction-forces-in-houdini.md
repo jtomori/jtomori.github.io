@@ -58,3 +58,6 @@ Hope you will find this article helpful, if you find any mistakes, or have ideas
 I would like to thank [Macha](https://vimeo.com/user2308558) and [Petz](http://forums.odforce.net/profile/2942-petz/) for sharing their knowledge on odforce forums, they inspired me and helped me to do this stuff :)
 
 [project file](http://forums.odforce.net/topic/27536-jurajs-playground/?do=findComment&comment=176233)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

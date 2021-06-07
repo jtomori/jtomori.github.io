@@ -153,3 +153,6 @@ That should be all, thanks for reading :)
 Here are scripts/configs I used on VCA side:
 
 https://gist.github.com/jtomori/bd18e35035fc0dce6f334bc61cb34076
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

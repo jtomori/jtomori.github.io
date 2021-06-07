@@ -24,3 +24,6 @@ After that we can link **Focal Distance** parameter to our **dist**. Feel free t
  
 
 [You can download project file here.](https://drive.google.com/open?id=1NsrfBPg6Gz-cpP32U6sqs4slzck7xpu3)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

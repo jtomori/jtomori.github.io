@@ -19,3 +19,6 @@ https://youtu.be/SNa18n5d8UY?t=1m26s
  
 
 I am planning to open-source all my tools after finishing the studies, stay tuned :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

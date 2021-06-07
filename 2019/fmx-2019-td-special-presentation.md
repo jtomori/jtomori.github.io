@@ -15,3 +15,6 @@ categories:
 I would like to share my graduation project **VFX Fractal Toolkit**. I finished my [TD](https://animationsinstitut.de/en/curriculum/animation/technical-director/technical-directing/) studies at [Filmakademie](https://www.filmakademie.de/en/) last month and had a chance to present the results at the last FMX. You can find out more about the **VFT** [here](https://github.com/jtomori/vft), where you can also check the code.
 
 https://youtu.be/n-m00N7TYYM?t=40m52s
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

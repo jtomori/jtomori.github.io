@@ -25,3 +25,6 @@ The shading setup in Blender looks pretty similar to the one used in Arnold and 
 For the testing I used Blender 2.80 beta running in [a Docker container](https://github.com/jtomori/docker_blender_gpu/).
 
 Keep in mind that rendering such volumes is pretty slow and neither Arnold nor Cycles support OSL on GPU. I included the changes in [blender branch](https://github.com/jtomori/vft/tree/blender) of the repository (not for all OSL shaders yet, but you get the idea :)).
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

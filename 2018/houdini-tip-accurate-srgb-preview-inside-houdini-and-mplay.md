@@ -30,3 +30,6 @@ export HOUDINI\_IMAGE\_DISPLAY\_LUT="path\_to\_folder\_with/linear-to-srgb\_14bi
 export HOUDINI\_IMAGE\_DISPLAY\_OVERRIDE=1
 
 You can find documentation of houdini environment variables [here](http://www.sidefx.com/docs/houdini/ref/env). And of course you can get the LUT [here](https://drive.google.com/open?id=18pZz9CBvqNfqnG_3M0zy3B-7DMkZsFsQ) ([source](https://www.sidefx.com/forum/topic/37329/?page=1#post-170199)).
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

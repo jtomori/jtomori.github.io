@@ -176,3 +176,6 @@ I also created a simple Bash script for transforming image sequence, put it into
  
 
 That should be all, for more settings and how to tune parameters to get the best results check the descriptions on the GitHub repos. Have a fun, and if you find any mistakes / suggestions for improvements, just let me know.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

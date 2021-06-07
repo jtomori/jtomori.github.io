@@ -23,3 +23,6 @@ I tested the tool under _Houdini, Maya, Linux_ and _Windows_ and it looked simil
 The tool is [hosted on GitHub](https://github.com/jtomori/batch_textures_convert) and you will find there setup and usage instructions.
 
 Hope you will like it, I will welcome your feedback and suggestions.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

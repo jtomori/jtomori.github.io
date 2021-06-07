@@ -23,3 +23,6 @@ Interesting is hermite interpolation which has two parameters: tension and bias.
 You can download project file [here](https://drive.google.com/file/d/0B0hpa2flKntodFp0RUVBRTJsUGM/view?usp=sharing).
 
 I am planning to break down some interesting projects I have been working on. You can check videos on my [vimeo channel](https://vimeo.com/jurajtomori). Hope somebody will find it useful / informative and see you in my next post :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

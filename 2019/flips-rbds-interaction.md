@@ -62,3 +62,6 @@ The next part needs to tackle constraints breaking. Applying velocity to RBDs do
 That's it, the base setup is done :). My result is not very impressive but it is an example for showing the concept behind it. For the actual shot it would need lots of more work to include secondary elements for the simulation to be more realistic.
 
 Happy simming.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

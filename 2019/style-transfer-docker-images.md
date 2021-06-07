@@ -29,3 +29,6 @@ $ docker run -ti --rm --runtime=nvidia jtomori/neural-fast-style-transfer bash
 You will enter container with all the libraries you need and style transfer repositories prepared. Much easier than manually setting up all those things, right?
 
 You can check more details on [my repository](https://github.com/jtomori/style_transfer_docker/).
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+

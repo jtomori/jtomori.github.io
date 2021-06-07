@@ -59,3 +59,6 @@ HOUDINI\_DSO\_PATH = "&:/home/juraj/OpenVDB\_guide/openvdb-3.3.0/build/houdini16
 (It is important to use the _&:_ symbol, which means to include all the default locations and then to append our new one. Without it we would lost all standard Houdini nodes :) )
 
 Happy Houdining, if you have any suggestions/errors feel free to contact me :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+
