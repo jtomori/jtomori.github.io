@@ -1,0 +1,12 @@
+---
+title: "1st"
+date: "2015-11-08"
+categories: 
+  - "cg"
+---
+
+Hi there,
+
+I will be posting here some stuff I am working on and things about vfx that I find interesting. Hopefully some tips&tricks that somebody will find useful. I learned a lot from reading other's blogs so why not to write one more? Also when you notice mistakes in my posts or you know better solutions please let me know and I will correct them.
+
+A little about me. I am from Slovakia where I study _[Visual Effects](http://avfx.sk/)_ at [_Academy of Performing Arts_ in Bratislava](http://ftf.vsmu.sk/). Currently I am taking part in exchange programme and I am studying _[Animation and VFX](http://www.falmouth.ac.uk/animation)_ at _Falmouth University_ in UK. I am trying to learn how to make those awesome VFX that can be seen in movies. So I am digging into CG: workflows, proceduralism, bit of coding and rendering.
