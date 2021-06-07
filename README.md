@@ -1,2 +1,1 @@
-# jtomori.github.io
-Personal website
+# [jtomori.github.io](https://jtomori.github.io/)
