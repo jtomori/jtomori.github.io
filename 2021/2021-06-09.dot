@@ -1,0 +1,16 @@
+digraph { 
+    M -> V
+    M -> V -> G [style=dashed]
+    G -> V
+    G -> L
+    G -> P
+    C -> V
+    C -> L
+    C -> G
+    M -> C
+    M -> P
+    M -> P -> I [style=dotted]
+    M -> L
+} 
+
+// dot -Tsvg 2021-06-09.dot > images/opengraph.svg
