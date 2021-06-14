@@ -1,0 +1,49 @@
+<meta charset="utf-8" lang="en">
+
+**The TD's Guide to Laziness**
+[ <- ](..) _2021-06-14_
+
+I've finally decided to publish a couple of tips I've been collecting for a while.
+
+Its goal is to improve your development experience as well as artists' user experience of using your tools. It aims to maximize your reward to effort ratio - keeping your job fun and time well spent. Implementing those ideas requires some initial time and effort investment but from my experience it pays off very quickly - and most importantly lets you stay lazy.
+
+It's written for technical directors / developers and with a VFX pipeline in mind, often referring to Python and SideFX Houdini. However I believe that it generalizes well and is relevant in other environments too.
+
+For more tips I recommend [lazyprogrammer](https://www.lazyprogrammer.it/).
+
+# General
+
+* **Document your work** - simplifies life for artists and developers, makes it easy to switch companies, you can easily pick up your own older work
+* **Use images, gifs in docs** - makes artists familiar with your tool with the least effort, shakes off a bit of fear of new things _(e.g. record gifs with [Peek](https://github.com/phw/peek), [ScreenToGif](https://www.screentogif.com/))_
+* **Record training material** - helps current and new artists, lets them take a look when they need it
+* **Share examples**
+* **Make version rollbacks easy** - when something breaks then it's easier to downgrade and troubleshoot the issue with less pressure
+* **Make your pipeline reproducible and identical if possible** - if something doesn't work on one machine, or on all machines then it narrows down the potential issue a little bit
+* **Follow [POLA](https://en.wikipedia.org/wiki/Principle_of_least_astonishment) where possible**
+
+# Code
+
+* **Write simple, dumb code** - first focus on correctness and clarity, optimize later when actually needed
+* **Comment, format your code** - it's read more often than it's written
+* **Include StackOverflow sources in comments** - explains where the smart code is coming from ;)
+* **Agree on a common code style, comments style and enforce it** - makes all code look uniform, easier to navigate, understand _(e.g use [pylint](https://www.pylint.org/), [flake8](https://flake8.pycqa.org) and [pydocstring](https://pydocstring.readthedocs.io) in CI)_
+* **Anticipate artists' errors and questions** - answer them beforehand or even better improve the tool and avoid them altogether
+* **Write helpful error messages, show warnings** - suggest likely causes and possible fixes, it will teach artists to actually read them
+* **Don't hardcode things, set them with configs, or environment variables**
+* **Use type hints** - let the type checker find bugs instead of others
+* **Unit test** - makes long-term development possible
+* **Integration test** - saves you from manual testing, makes sure the thing actually works
+* **Get your code reviewed**
+* **Agree on a common versioning scheme**
+* **Write changelogs**
+
+# Houdini
+
+* **Set descriptive labels to HDA parameters**
+* **Set parameter tooltips with explanations**
+* **Set HDAs help button to redirect to your internal knowledge base** - makes it easy to find stuff in your knowledge base _(you can set env var `HOUDINI_EXTERNAL_HELP_BROWSER=1` to open it in a web browser)_
+* **Ask artists to contribute their own findings there**
+* **Keep I/O, DCC APIs outside of the core logic** - easier to test, reduces number of mocks _([The Clean Architecture](https://youtu.be/DJtef410XaM?t=1442) often helps)_
+* **Keep as little code as possible in HDAs** - keep it in modules, libraries, it's easier to track changes in version control system and reuse it
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
