@@ -1,0 +1,57 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**Overclocked Raspberry Pi: performance and temperature**
+[ <- ](..) _2022-01-02_
+
+I have been recently playing with Raspberry Pi - mostly setting some services for personal use. One thing I was tempted to do was to increase its CPU frequency. I have never overclocked anything, but this seemed like an easy and safe thing to try. I was interested in its impact on performance and temperature - here are my findings.
+
+I have Raspberry Pi 4 Model B in aluminum case with 2 fans.
+
+# Default configuration
+
+I've noted values of two commands with and without overclocking: `lscpu` and `vcgencmd measure_clock arm`.
+
+`lscpu` displays useful information about CPU, including its frequency range and [BogoMIPS](https://en.wikipedia.org/wiki/BogoMips) (which I just learned about and I like its wiki page). The second command `vcgencmd measure_clock arm` "returns the current frequency of the specified clock".
+
+~~~ bash
+$ lscpu
+...
+CPU max MHz:         1800.0000
+CPU min MHz:         600.0000
+BogoMIPS:            324.00
+...
+$ vcgencmd measure_clock arm
+frequency(48)=1800457088
+~~~
+
+# Overclocked
+
+I've decided to overclock to 2 GHz, and I've added the following options into `/boot/config.txt`:
+
+~~~ none linenumbers
+# My changes: overclocking
+over_voltage=6
+arm_freq=2000
+~~~
+
+After reboot I've got the following CPU information:
+
+~~~ bash
+$ lscpu
+...
+CPU max MHz:         2000.0000
+CPU min MHz:         600.0000
+BogoMIPS:            360.00
+...
+$ vcgencmd measure_clock arm
+frequency(48)=2000478464
+~~~
+
+Max CPU frequency got increased by ~ 11 %, from 1.8 GHz to 2.0 GHz.
+
+# Results
+
+I've checked various metrics for a period of 5 hours with and without overclocking. Raspberry Pi was under a similar steady load in both cases - majority of CPU time is spent on some image processing and passthrough recording of a couple of video streams. I assume that the indoor environment temperature is steady enough for this comparison and don't take it into consideration (nor do I control or measure it).
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
