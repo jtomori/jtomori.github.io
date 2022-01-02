@@ -1,0 +1,36 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**Covering IR lights in tp-link Tapo C200 IP camera**
+[ <- ](..) _2022-01-03_
+
+I have a couple of C200 cameras - they are cheap and have some nice features. They operate in two modes based on the amount of available light - day and night mode. My [understanding](https://electronics.stackexchange.com/a/162030) is that on the transition to night node an IR filter is moved away from lens, thus making it more sensitive to the IR spectrum. That's when camera's IR lights automatically turn on as well, illuminating the environment and invisible to human sight.
+
+One thing that bugged me was that I couldn't monitor outdoor area with having those cameras indoors behind a window. That's because the IR light gets reflected off the window and nothing can be seen because of that. Unfortunately it doesn't look possible to turn off the IR light in night mode.
+
+After I stumbled upon a [guide to camera disassembly](https://drmnsamoliu.github.io/hardware.html), I've decided to disassemble mine as well. It didn't look too complicated and I wanted to see if I can do something about the lights. I ended up covering them, so that no light can escape the camera.
+
+Here you can see camera view without and with IR lights blocked.
+
+![](images/tapo_orig.jpeg) ![](images/tapo_mod.jpeg)
+
+# Disassemble
+
+I recommend following the [disassemble guide](https://drmnsamoliu.github.io/hardware.html) which shows how to reach the board with the lights. I'm sharing a couple of photos as well in case it would help.
+
+![Remove cover](images/tapo_1.jpeg)
+![Unscrew marked screws](images/tapo_2.jpeg)
+![Unscrew marked screws](images/tapo_3.jpeg)
+![Unscrew marked screws](images/tapo_4.jpeg)
+![Push out the board with lens and unscrew marked screws](images/tapo_5.jpeg)
+![Finally reached 4 IR lights](images/tapo_6.jpeg)
+![I have painted them black](images/tapo_7.jpeg)
+![And covered in aluminum foil, which blocks most of the light](images/tapo_8.jpeg)
+
+# Conclusion
+
+Painting the lights has made this modification practically irreversible. I've experimented with sticking black tape on camera body as well, which worked to some extent, but required too many layers to block all of the light.
+
+Could have I just moved the camera behind the window? Yes, but that would be less fun :)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
