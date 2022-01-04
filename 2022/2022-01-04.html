@@ -1,0 +1,123 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**Houdini menus load in reversed order**
+[ <- ](..) _2022-01-04_
+
+I have run into path ordering issues when setting up a Houdini environment a couple of times. For example when adding htoa, redshift and similar plugins to `HOUDINI_PATH`. The issue seemed to be related to menu items, which plugins can add to Houdini UI, but I have never managed to get to the bottom of it. I would randomly shuffle paths order in my environment variables until all errors went away :)
+
+Recently I was revisiting som older configs and I've stumbled upon this once again. Therefore I have decided to finally investigate it a little bit.
+
+Errors I would get would look like this:
+
+~~~ none
+Error while parsing a menu definition file
+ 'X:/packages/qLib/0.2.207/MainMenuCommon.xml':
+Cannot find element 'help_menu' needed for ordering of 'qLib_menu'.
+Cannot find element 'export_files' needed for ordering of 'file_menu_sep_ql_recover'.
+Cannot find element 'saveastype_strip' needed for ordering of 'file_menu_sep_ql_save_pre'.
+Error while parsing a menu definition file
+ 'X:/packages/GameDevToolset/19.0.455/MainMenuCommon.xml':
+Could not find the parent element 'preferences_submenu' for 'set_external_editor'.
+Cannot set order: element 'set_external_editor' has no parent.
+Could not find the parent element 'windows_menu' for 'external_python_source_editor'.
+Cannot set order: element 'external_python_source_editor' has no parent.
+Error while parsing a menu definition file
+ 'X:/packages/qLib/0.2.207/NetworkViewMenu.xml':
+Cannot find element 'help_menu' needed for ordering of 'qLib_network_view_menu'.
+Error while parsing a menu definition file
+ 'X:/packages/GameDevToolset/19.0.455/NetworkViewMenu.xml':
+Cannot find element 'help_menu' needed for ordering of 'labs_network_view_menu'.
+~~~
+
+In this case I am adding `qLib` and `GameDevToolset` tools into Houdini. Houdini would load, but menus would be in wrong order or wouldn't show at all. 
+
+I suspected what was the issue: custom menu items can be set as children of Houdini menus. But Houdini menu items must load first, so that child items can find their parent item. Therefore I paid close attention to have Houdini default paths at the start of `HOUDINI_PATH` (e.g. with the `&` [special character](https://www.sidefx.com/docs/houdini/basics/config_env.html#special-characters-in-path-variables)), so that they would be loaded before the additional tools would be loaded. This setup however still resulted in the errors above.
+
+After a few attempts I looked into docs and checked results of `hconfig` and finally found the reason. All Houdini environment variables are read left to right, but `HOUDINI_MENU_PATH` loads in reverse order.
+
+From [docs](https://www.sidefx.com/docs/houdini/basics/config_menus.html):
+
+> Houdini searches the `$HOUDINI_MENU_PATH` in reverse order, 
+> first looking for `MainMenuCommon.xml` and then for `MainMenuMaster.xml` files.
+
+And `hconfig -ap`:
+~~~ none
+HOUDINI_PATH := "C:/PROGRA~1/SIDEEF~1/HOUDIN~1.455/packages/kinefx;&;X:/packages/GameDevToolset/19.0.455;X:/packages/qLib/0.2.207"
+    The path of directories where Houdini looks for configuration files.
+
+    Directories searched (in order) are:
+        1) "$HFS/packages/kinefx"
+        2) "$HIP"
+        3) "$HOUDINI_USER_PREF_DIR"
+        4) "$HFS/houdini"
+        5) "$HFS/bin"
+        6) "X:/packages/GameDevToolset/19.0.455"
+        7) "X:/packages/qLib/0.2.207"
+
+HOUDINI_MENU_PATH := "@"
+    The search path for XML menu files, such as the main menu, the node
+    RMB menu, parameter menu, and shelf menu.
+    Note, the paths are scanned in reverse order, i.e., the files from
+    directories further in the path are loaded first, and files from
+    directories earlier in the path are loaded later. This ensures that
+    the default menus are loaded first, which allows custom files to
+    modify their configuration.
+
+    Default path: '@'
+        Where @ is replaced with HOUDINI_PATH
+    Directories searched (in order) are:
+        1) "$HFS/packages/kinefx"
+        2) "$HIP"
+        3) "$HOUDINI_USER_PREF_DIR"
+        4) "$HFS/houdini"
+        5) "$HFS/bin"
+        6) "X:/packages/GameDevToolset/19.0.455"
+        7) "X:/packages/qLib/0.2.207"
+~~~
+
+So this arguably unintuitive decision is diverting from the expected behavior, probably to catch user mistakes. The issue is that when not set, `HOUDINI_MENU_PATH`'s default `@` value is inheriting `HOUDINI_PATH`, which is not reversed. 
+
+Though many tools prefer pointing `HOUDINI_PATH` to an expected folder structure, where other paths can find their things (menus, assets, scripts etc) for the simplicity of config. I like that idea too as it requires setting only one path, instead of dozens.
+
+It's not a big deal and was easy to fix once I've found the reason. In my opinion however it violates [the principle of least astonishment](https://en.wikipedia.org/wiki/Principle_of_least_astonishment). Possible fix at SideFX side could involve switching order (but being a minor backward incompatible change), or updating error messages to indicate the likely cause of the issue, like
+
+`Cannot find element 'help_menu' needed for ordering of 'xyz'. Note that paths in HOUDINI_MENU_PATH are read in reversed order.`
+
+For completeness I am adding the correct config values:
+
+~~~ none
+HOUDINI_PATH := "C:/PROGRA~1/SIDEEF~1/HOUDIN~1.455/packages/kinefx;X:/packages/GameDevToolset/19.0.455;X:/packages/qLib/0.2.207;&"
+    The path of directories where Houdini looks for configuration files.
+
+    Directories searched (in order) are:
+        1) "$HFS/packages/kinefx"
+        2) "X:/packages/GameDevToolset/19.0.455"
+        3) "X:/packages/qLib/0.2.207"
+        4) "$HIP"
+        5) "$HOUDINI_USER_PREF_DIR"
+        6) "$HFS/houdini"
+        7) "$HFS/bin"
+
+HOUDINI_MENU_PATH := "@"
+    The search path for XML menu files, such as the main menu, the node
+    RMB menu, parameter menu, and shelf menu.
+    Note, the paths are scanned in reverse order, i.e., the files from
+    directories further in the path are loaded first, and files from
+    directories earlier in the path are loaded later. This ensures that
+    the default menus are loaded first, which allows custom files to
+    modify their configuration.
+
+    Default path: '@'
+        Where @ is replaced with HOUDINI_PATH
+    Directories searched (in order) are:
+        1) "$HFS/packages/kinefx"
+        2) "X:/packages/GameDevToolset/19.0.455"
+        3) "X:/packages/qLib/0.2.207"
+        4) "$HIP"
+        5) "$HOUDINI_USER_PREF_DIR"
+        6) "$HFS/houdini"
+        7) "$HFS/bin"
+~~~
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
