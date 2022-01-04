@@ -12,7 +12,7 @@ I have Raspberry Pi 4 Model B in aluminum case with 2 fans.
 
 I've noted values of two commands with and without overclocking: `lscpu` and `vcgencmd measure_clock arm`.
 
-`lscpu` displays useful information about CPU, including its frequency range and [BogoMIPS](https://en.wikipedia.org/wiki/BogoMips) (which I just learned about and I like its wiki page). The second command `vcgencmd measure_clock arm` "returns the current frequency of the specified clock".
+`lscpu` displays useful information about CPU, including its frequency range and [BogoMIPS metric](https://en.wikipedia.org/wiki/BogoMips) (which I just learned about). The second command `vcgencmd measure_clock arm` "returns the current frequency of the specified clock".
 
 ~~~ bash
 $ lscpu
@@ -27,7 +27,7 @@ frequency(48)=1800457088
 
 # Overclocked
 
-I've decided to overclock to 2 GHz, and I've added the following options into `/boot/config.txt`:
+I've decided to overclock to 2 GHz, by adding the following options into `/boot/config.txt`:
 
 ~~~ none linenumbers
 # My changes: overclocking
@@ -48,10 +48,27 @@ $ vcgencmd measure_clock arm
 frequency(48)=2000478464
 ~~~
 
-Max CPU frequency got increased by ~ 11 %, from 1.8 GHz to 2.0 GHz.
+Based on the output above I can see that max CPU frequency got increased by ~ 10 %, from 1.8 GHz to 2.0 GHz.
 
 # Results
 
-I've checked various metrics for a period of 5 hours with and without overclocking. Raspberry Pi was under a similar steady load in both cases - majority of CPU time is spent on some image processing and passthrough recording of a couple of video streams. I assume that the indoor environment temperature is steady enough for this comparison and don't take it into consideration (nor do I control or measure it).
+I've checked various metrics for a period of 5 hours without and with overclocking. Raspberry Pi was under a similar load in both cases - majority of CPU time is spent on some image processing and passthrough recording of multiple video streams. 
+
+I assume that the environment temperature is steady enough for this comparison and I don't take it into consideration (nor do I control or measure it).
+
+My expectation was to see roughly 10% increase of temperature and 10% decrease of CPU usage, since the CPU should do the same work a bit quicker now.
+
+The left half indicates default configuration, the right half the overclocked one. Numbers below are eyeballed estimates.
+
+![CPU frequency [MHz], ~ 10% increase](images/rpi_freq.png)
+![Temperature [°C], ~ 10% increase](images/rpi_temp.png)
+![Total CPU utilization [%] (pink: user, blue: system), ~ 10% increase?](images/rpi_cpu_util.png)
+![System load 15 minutes average, ~ 25% increase?](images/rpi_load15.png)
+
+The temperature increase follows closely CPU frequency increase. 
+
+As for CPU utilization and system load, their graphs don't look too convincing. Unintuitively both metrics look like they actually increased, but look more noisy as well. This might be caused by some randomness in the running application, or my wrong intuition.
+
+I would probably get more accurate results by running [`stress`](https://linux.die.net/man/1/stress), but I was mostly interested in the impact of overclocking on my specific setup. Further tests would be needed to figure this out :)
 
 <!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
