@@ -1,0 +1,41 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**A better way to batch-convert textures from Houdini**
+[ <- ](..) _2022-01-05_
+
+Back at school I did a small tool for fast batch processing of textures from Houdini: [batch_textures_convert](https://github.com/jtomori/batch_textures_convert/). It was a simple and useful idea, quick to implement and good learning experience. Being integrated into Houdini, it was easy for artists to use.
+
+It turned out that a couple of external people have used it as well, occasionally sending me emails with setup questions, or asking about compatibility with newer Houdini versions.
+
+The tool worked all right, could be used from Maya, Nuke etc. It also wasn't too hard to add custom commands, e.g. by adding them [here](https://github.com/jtomori/batch_textures_convert/blob/master/scripts/python/batch_convert/converters.py).
+
+I have stopped maintaining it soon after graduating though. One of the reasons for that was introduction of TOPs into Houdini. TOPs offered a far more elegant, powerful and easier way of doing many things, including batch conversion of textures!
+
+Therefore I've decided to write this post, where I will show a better way of batch converting textures with TOPs.
+
+TOPs have the same requirements as my tool: the program, which will process our files, needs to be in the `PATH` environment variable (or a full path can be set as well). Specifying command is however much easier in TOPs. Command that Houdini will execute can be edited directly in node parameters. On top of that, parallel execution can be easily controlled from a scheduler.
+
+I will replicate a command for creating Arnold's TX textures from [my tool](https://github.com/jtomori/batch_textures_convert/blob/90c6770516fed2b188f21f11031ea124b831f909/scripts/python/batch_convert/converters.py#L92) in TOPs: `maketx -u --oiio --checknan --filter lanczos3 texture_in_path -o texture_out_path`. `maketx` is part of the [OIIO](https://github.com/OpenImageIO/oiio) project.
+
+We need to define two things: inputs and the command:
+
+![Network](images/top_network.png width="400px")
+
+![filepattern_load_textures](images/top_file.png width="400px")
+
+![genericgenerator_maketx](images/top_cmd.png)
+
+Let's use everything our machine has to offer:
+
+![localscheduler](images/top_scheduler.png width="400px")
+
+Caching is also very easy to do, just specify the expected output parameter:
+
+![genericgenerator_maketx](images/top_cmd_out.png width="400px")
+
+With caching, we can control behavior in case of existing outputs directly from Houdini.
+
+That's it. Hopefully you can see from this mini tutorial the power of TOPs and why it is a good alternative to many tools and ad-hoc scripts.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
