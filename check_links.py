@@ -13,7 +13,7 @@ def get_status(link):
     """Return a 2-tuple, first item is a bool whether the check has passed, the second is int with the status code."""
     status = requests.head(link, headers={"User-Agent": AGENT}).status_code
 
-    if status in [200, 301, 302, 303]:
+    if status in [200, 301, 302, 303, 999]:
         return True, status
     
     return False, status
