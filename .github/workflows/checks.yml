@@ -1,0 +1,12 @@
+name: checks
+on: [push]
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - run: pip install requests
+      - run: python check_links.py
