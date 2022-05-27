@@ -1,0 +1,29 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**Volumetric video research presented @ Siggraph, CVMP**
+[ <- ](..) _2022-05-27_
+
+We are looking into techniques for improving quality and control of volumetric video. Last year we have published some of our progress at two conferences: Siggraph and CVMP.
+
+The following advances have enabled us to use volumetric assets closer to the camera and make them easier to work with in VFX pipelines.
+
+# Reflectance Estimation for Free-viewpoint Video, Siggraph
+[Poster](https://dl.acm.org/doi/10.1145/3450618.3469146), see supplemental material for video.
+
+Many systems [^ms_fvv] output mesh with a "combined" texture, which is an average of projections from multiple viewpoints. This isn't ideal since the texture contains shadows and view-dependent effects tend to be averaged out.
+
+With this work we try to separate the individual texture components out as a post process, ideally to be used with physically based shading.
+
+# Volumetric video at the intersection of visual effects and virtual production, CVMP
+[Poster](https://www.cvmp-conference.org/files/2021/CVMP2021-programme.pdf) (page 11), [article](https://www.dimensionstudio.co/news/volumetric-video-intersection-visual-effects-and-virtual-production).
+
+![Presentation](https://youtu.be/Nyo9Cez_Re8)
+
+We compare avatars-based approach with volumetric video and present a couple of techniques for improving workflows with volumetric video.
+
+---
+
+[^ms_fvv]: For example https://hhoppe.com/fvv.pdf
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
