@@ -7,15 +7,20 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 AGENT = os.getenv("AGENT", "Mozilla/5.0 ()")
+SKIPLIST = ["https://linkedin.com"]
 
 
 def get_status(link):
-    """Return a 2-tuple, first item is a bool whether the check has passed, the second is int with the status code."""
-    status = requests.head(link, headers={"User-Agent": AGENT}).status_code
+    # Skip certain hosts which don't play nicely
+    for skip_link in SKIPLIST:
+        if skip_link in link:
+            return True, 0
 
-    if status in [200, 301, 302, 303, 999]:
+    status = requests.head(link, headers={"User-Agent": AGENT}, allow_redirects=True).status_code
+
+    if status in [200, 301, 302, 303]:
         return True, status
-    
+
     return False, status
 
 
