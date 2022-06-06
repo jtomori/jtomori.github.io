@@ -2,9 +2,12 @@ import os
 import re
 import sys
 import glob
+import urllib3
 import requests
 from concurrent.futures import ThreadPoolExecutor
 
+# We make insecure requests if a domain has SSL issues, disable warning for clean output
+urllib3.disable_warnings()
 
 AGENT = os.getenv("AGENT", "Mozilla/5.0 ()")
 SKIPLIST = ["https://linkedin.com"]
@@ -16,9 +19,12 @@ def get_status(link):
         if skip_link in link:
             return True, 0
 
-    status = requests.head(link, headers={"User-Agent": AGENT}, allow_redirects=True).status_code
+    try:
+        status = requests.head(link, timeout=15, headers={"User-Agent": AGENT}, allow_redirects=True).status_code
+    except requests.exceptions.SSLError:  # In case of failed certificate verification try without
+        status = requests.head(link, timeout=15, headers={"User-Agent": AGENT}, allow_redirects=True, verify=False).status_code
 
-    if status in [200, 301, 302, 303]:
+    if status in [200]:
         return True, status
 
     return False, status
