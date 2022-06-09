@@ -23,6 +23,9 @@ def get_status(link):
         status = requests.head(link, timeout=15, headers={"User-Agent": AGENT}, allow_redirects=True).status_code
     except requests.exceptions.SSLError:  # In case of failed certificate verification try without
         status = requests.head(link, timeout=15, headers={"User-Agent": AGENT}, allow_redirects=True, verify=False).status_code
+    except:
+        print(f"Unhandled exception during request to: {link}")
+        raise
 
     if status in [200]:
         return True, status
@@ -39,9 +42,9 @@ def main():
     for html_file in html_files:
         with open(html_file, encoding="utf-8") as f:
             contents = f.read()
-        
+
         links += re_link.findall(contents)
-    
+
     with ThreadPoolExecutor(max_workers=8) as executor:
         codes_generator = executor.map(get_status, links)
 
@@ -52,7 +55,7 @@ def main():
         if not passed:
             print(f"Fail: {links[i]} ({code})")
             all_good = False
-    
+
     if not all_good:
         sys.exit(1)
 
