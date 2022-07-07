@@ -1,0 +1,105 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**Using VSCode with Houdini 19 and Python 3**
+[ <- ](..) _2022-07-07_
+
+Hello,
+this is a long-overdue update of my [previous post](https://jurajtomori.wordpress.com/2018/02/20/houdini-tip-using-hou-module-in-visual-studio-code/). It was a nice workflow enhacement and I've got a positive feedback on that. But many things have changed (for better!) since then and here is again a quick guide for setting up VSCode for Python development in Houdini.
+
+I am using the latest production-ready version: `Houdini 19.0.657`, which includes `Python 3.7.13`. Hopefully this workflow will be valid for a few future Houdini, Python and VSCode versions. I've tested it on both Linux and Windows operating systems.
+
+So let's dive in.
+
+# Setup
+
+Setup is actually quite simple. We can specify the `hython` executable as a Python interpreter for VSCode. Official VSCode docs cover it nicely [here](https://code.visualstudio.com/docs/python/environments#_manually-specify-an-interpreter).
+
+Press `Ctrl + Shift + P` for the command palette, select _Python: Select Interpreter_ and _Enter interpreter path..._ options. Locate the `hython` binary in the open dialog.
+
+I could find it in `/opt/hfs19.0.657/bin/hython` on Linux and `c:\Program Files\Side Effects Software\Houdini 19.0.657\bin\hython3.7.exe` on Windows.
+
+That's it.
+
+You might see the following errors, but restarting VSCode seems to fix the issue.
+
+![](images/vscode_error.png width="400px")
+
+# Results
+
+Let's see how VSCode can help us with suggestions. I should also mention that I am using Microsoft's _Python_ and _Pylance_ extensions.
+
+Let's create a dummy Python file for testing things:
+
+~~~python linenumbers
+import hou
+
+
+def print_node_path(node: hou.Node) -> None:
+    """Print node's path."""
+    print(f"{node.path()}")
+
+
+def length_of_two_added_vectors(a: hou.Vector3, b: hou.Vector3) -> hou.Vector3:
+    """Return length of a sum of two vectors."""
+    sum_vec: hou.Vector3 = a + b
+    return sum_vec.length()
+
+~~~
+
+Pressing `Ctrl + Space` at various positions shows us helpful suggestions.
+
+![ ](images/vscode2.png width="600px")
+
+![ ](images/vscode3.png width="600px")
+
+![ ](images/vscode1.png width="600px")
+
+# Some observations
+
+Note that I am using (and you should too) [type hints](https://docs.python.org/3/library/typing.html). These are handy helpers for IDE, humans, type-checkers when working with dynamically typed languages, like Python. Those hints aren't checked at runtime, but they help with development experience and code reliability. Type checkers like [mypy](https://mypy.readthedocs.io/en/stable/) can use them for detecting type errors before your users find them.
+
+Without them the IDE does not know my intention of what type I would pass into the function, like here.
+
+![](images/vscode4.png width="400px")
+
+We can see that when using type hints, IDE's description matches the content from Houdini [docs](https://www.sidefx.com/docs/houdini/hom/hou/Node.html#path) for the `Node.path()` method, which is quite handy:
+
+![](images/vscode2.png width="600px")
+
+![ ](images/nodepath.png width="400px")
+
+However, there's a room for improvement. Let's take a look at this case:
+
+![](images/vscode5.png width="600px")
+
+I've removed type hint for the `sum_vec` variable. Shouldn't it be clear that the result should be `hou.Vector3`? VSCode's suggestion however doesn't know `sum_vec`'s type and therefore doesn't show any suggestion for its `length()` method.
+
+However Houdini [docs](https://www.sidefx.com/docs/houdini/hom/hou/Vector3.html#__add__) state that the type of the addition's result is `hou.Vector3`:
+
+![](images/vectoradd.png width="550px")
+
+Let's take a look at the `hou.Vector3.__add__()` method's docstring:
+
+![](images/vscode6.png width="600px")
+
+This explains the behavior. The docstring has a correct type annotation `hou.Vector3`, which is used in the online docs. However method's return type is `HOM_Vector3`, a [HDK's C++ class](https://www.sidefx.com/docs/hdk/class_h_o_m___vector3.html), which the IDE cannot interpret and therefore treats it as `Any`.
+
+![](images/vscode7.png width="600px")
+
+Though this is a only a minor issue, which will probably be addressed in a future Houdini version.
+
+**Anyway, I am really happy with the Python 2 to 3 transition and the effort that SideFX has put into documentation and seamless transition. Very impressive feat.**
+
+# PS
+
+Let's try replacing `HOM_Vector3` with `Vector3` in the `hou.py` file.
+
+![](images/vscode8.png width="400px")
+
+Indeed that helps :)
+
+![](images/vscode9.png width="600px")
+
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
