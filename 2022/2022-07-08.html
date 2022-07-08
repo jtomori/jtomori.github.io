@@ -1,0 +1,33 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**Fussel**
+[ <- ](..) _2022-07-08_
+
+Hey, **Fussel** is a really cool animated movie I've helped with during my studies at Filmakademie. It's been recently publicly released after a festival run so I'd like to share it and note down some of the things I've worked on.
+
+![](https://youtu.be/UdKKnsIMOgI)
+
+Btw it's been 3 years since I've worked on it so hopefully I remember things right. This project has had an interesting pipeline, where Alex would sculpt environments and make animation loops in Quill in VR.
+
+I helped with post-processing of Quill's exports, to make it pipeline and rendering friendly. Pipeline was done by Tim.
+
+Here are some of the steps:
+- Geometry was cleaned up
+- Vertex colors were smoothed on some objects to remove the sharp "brush" transitions
+- Hand-animated loops in Quill had jumps, so a smooth transition was added
+- Instancing was detected and animation was applied to all instances
+    - Alex would draw some background element, then instance it around the scene and then animate a "hero" instance
+    - Animation from the "hero" instance would be propagated to all other instances, with time offsets to avoid visual repetition
+- Export scene hierarchy as an Alembic, to be rendered in Maya with Arnold and Multiverse
+- I think that I also made some string deformation asset, that was used in a Maya rig, via Houdini Engine
+
+The processing was done in background, triggered by Tim's UI for ingesting Quill scenes. Processing was automatic, without any user input. It relied on some naming conventions agreed by Alex though, to specify what to do with various objects.
+
+Overall it was a very enjoyable project, both from the technical and team work point of views. I also got the coolest movie credit ever 🧙 :)
+
+For more info take a look at Animationinsitut's [blog post](https://animationsinstitut.de/en/blog/projects/detail/catch-the-red-thread) and FMX 19 talk below.
+
+![Fussel starts at 27:55](https://youtu.be/n-m00N7TYYM)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
