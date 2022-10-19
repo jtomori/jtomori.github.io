@@ -37,7 +37,7 @@ def main():
     html_files = glob.glob("**/*.html", recursive=True)
 
     links = []
-    re_link = re.compile("http[s]?://[a-zA-Z0-9./~=?_%:#-]*")
+    re_link = re.compile("http[s]?://[a-zA-Z0-9./~=?_%:#\-&]*")
 
     for html_file in html_files:
         with open(html_file, encoding="utf-8") as f:
