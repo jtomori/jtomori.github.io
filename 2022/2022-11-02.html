@@ -1,0 +1,86 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**Accessing Alembic's metadata with abcecho**
+[ <- ](..) _2022-11-02_
+
+Houdini ships with a handy utility [abcecho](https://www.sidefx.com/docs/houdini/ref/utils/abcecho.html) which prints information about the Alembic file.
+
+I've found it handy a few times when I wasn't sure where an Alembic file was coming from :)
+
+This is how it works: first make sure you can call the `abcecho` program in your shell ([as explained here](https://www.sidefx.com/faq/question/how-do-i-set-up-the-houdini-environment-for-command-line-tools/)). Then call it with the file's path as the first argument.
+
+~~~ bash
+$ abcecho '/home/juraj/hou_abc_tmp/output.abc'
+AbcEcho for Alembic 1.7.16 (built May 31 2021 18:21:02)
+  file written by: Houdini 19.0.538
+  using Alembic : Alembic 1.7.16 (built May 31 2021 18:21:02)
+  written on : Wed Nov  2 21:19:16 2022
+  user description : Exported from /home/juraj/hou_abc_tmp/v01.hip on 2022-11-02 21:19:16
+
+  ScalarProperty name=1.samples;interpretation=;datatype=uint32_t;arraysize=1;numsamps=1
+Object name=/geo1
+  CompoundProperty name=.xform;schema=AbcGeom_Xform_v3
+    ScalarProperty name=.inherits;interpretation=;datatype=bool_t;arraysize=1;numsamps=60
+    ScalarProperty name=.ops;interpretation=;datatype=uint8_t;arraysize=1;numsamps=60
+    ScalarProperty name=.vals;interpretation=;datatype=float64_t[16];arraysize=16;numsamps=60
+  ScalarProperty name=visible;interpretation=;datatype=int8_t;arraysize=1;numsamps=60
+Object name=/geo1/mountain1
+  CompoundProperty name=.geom;schema=AbcGeom_PolyMesh_v1
+    ScalarProperty name=.selfBnds;interpretation=box;datatype=float64_t[6];arraysize=6;numsamps=60
+    ArrayProperty name=P;interpretation=point;datatype=float32_t[3];arraysize=8;numsamps=60
+    ArrayProperty name=.faceIndices;interpretation=;datatype=int32_t;arraysize=24;numsamps=60
+    ArrayProperty name=.faceCounts;interpretation=;datatype=int32_t;arraysize=6;numsamps=60
+    CompoundProperty name=.arbGeomParams;schema=
+    ArrayProperty name=N;interpretation=normal;datatype=float32_t[3];arraysize=24;numsamps=60
+  ScalarProperty name=visible;interpretation=;datatype=int8_t;arraysize=1;numsamps=60
+~~~
+
+This file contains 60 frames of animated cube with normals. Note that you can see object's path in Houdini's graph, hip file's path, export date, Houdini version.
+
+Here's another file exported from... well, see for yourself :)
+
+~~~ bash
+> abcecho "C:\Users\Juraj\tests\abc_export\export_v01.abc"
+AbcEcho for Alembic 1.7.16 (built May 31 2021 18:18:28)
+  file written by: Maya 2023 AbcExport v1.0
+  using Alembic : Alembic 1.8.3 (built Aug  3 2022 14:35:12)
+  written on : Tue Oct 18 09:15:08 2022
+  user description : Exported from: C:/Users/Juraj/tests/abc_export/scene_v01.mb
+
+  ScalarProperty name=.childBnds;interpretation=box;datatype=float64_t[6];arraysize=6;numsamps=401
+  ScalarProperty name=statistics;interpretation=;datatype=string;arraysize=1;numsamps=1
+  ScalarProperty name=1.samples;interpretation=;datatype=uint32_t;arraysize=1;numsamps=1
+Object name=/geo_sim:Group2
+  CompoundProperty name=.xform;schema=AbcGeom_Xform_v3
+Object name=/geo_sim:Group2/out_cloth
+  CompoundProperty name=.geom;schema=AbcGeom_PolyMesh_v1
+    ScalarProperty name=.selfBnds;interpretation=box;datatype=float64_t[6];arraysize=6;numsamps=401
+    ArrayProperty name=P;interpretation=point;datatype=float32_t[3];arraysize=5020;numsamps=401
+    ArrayProperty name=.faceIndices;interpretation=;datatype=int32_t;arraysize=39518;numsamps=401
+    ArrayProperty name=.faceCounts;interpretation=;datatype=int32_t;arraysize=9908;numsamps=401
+    CompoundProperty name=uv;schema=
+      ArrayProperty name=.vals;interpretation=vector;datatype=float32_t[2];arraysize=10162;numsamps=401
+      ArrayProperty name=.indices;interpretation=;datatype=uint32_t;arraysize=39518;numsamps=401
+    ArrayProperty name=N;interpretation=normal;datatype=float32_t[3];arraysize=39518;numsamps=401
+Object name=/file1
+  CompoundProperty name=.xform;schema=AbcGeom_Xform_v3
+    ScalarProperty name=.inherits;interpretation=;datatype=bool_t;arraysize=1;numsamps=1
+    ScalarProperty name=.ops;interpretation=;datatype=uint8_t;arraysize=1;numsamps=1
+    ScalarProperty name=.vals;interpretation=;datatype=float64_t[3];arraysize=3;numsamps=1
+    ScalarProperty name=isNotConstantIdentity;interpretation=;datatype=bool_t;arraysize=1;numsamps=1
+Object name=/file1/geo_cache
+  CompoundProperty name=.geom;schema=AbcGeom_PolyMesh_v1
+    ScalarProperty name=.selfBnds;interpretation=box;datatype=float64_t[6];arraysize=6;numsamps=401
+    ArrayProperty name=P;interpretation=point;datatype=float32_t[3];arraysize=19726;numsamps=401
+    ArrayProperty name=.faceIndices;interpretation=;datatype=int32_t;arraysize=79010;numsamps=401
+    ArrayProperty name=.faceCounts;interpretation=;datatype=int32_t;arraysize=19781;numsamps=401
+    CompoundProperty name=uv;schema=
+      ArrayProperty name=.vals;interpretation=vector;datatype=float32_t[2];arraysize=21276;numsamps=401
+      ArrayProperty name=.indices;interpretation=;datatype=uint32_t;arraysize=79010;numsamps=401
+~~~
+
+Running `abcecho` does not require Houdini's license and there are [some more](https://www.sidefx.com/docs/houdini/ref/utils/index.html) Alembic-related tools worth being aware of.
+
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
