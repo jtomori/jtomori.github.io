@@ -1,0 +1,356 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+<style>
+    img {
+        background-color: #444;
+    }
+</style>
+
+**VEX treats positions and vectors as row vectors**
+[ <- ](..) _2022-11-03_
+
+# Intro
+
+You can do vector and matrix multiplications in various places in Houdini: HDK, HOM and VEX. [HDK](https://www.sidefx.com/docs/hdk/_h_d_k__matrix_intro.html) and [HOM](https://www.sidefx.com/docs/houdini/hom/hou/Matrix4.html) docs state that vectors, positions are treated as row vectors during matrix multiplication. In case of VEX, I couldn't really find this information in the docs and VEX's behavior when testing it seemed odd. That motivated me to investigate it. I was wondering - does VEX treat vectors as column vectors?
+
+Usually I just find the convention for a given library or an application and follow it: column vector ($4 \times 1$ matrix) is post-multiplied (vector is on the right), row vector ($1 \times 4$ matrix) is pre-multiplied (vector is on the left). It's [not possible](https://en.wikipedia.org/wiki/Matrix_multiplication#Definition) to use the wrong order, because then the two matrices would not have compatible shapes. VEX takes another approach though.
+
+Here's the starting point that will be transformed in the examples below.
+
+![Starting point, cube at origin, top view](images/xform_vex_1.png width="400px")
+
+# How HOM does it
+
+Create a _Python SOP_ with the following snippet. I will go over it below.
+
+~~~ Python linenumbers
+import hou
+
+node = hou.pwd()
+geo = node.geometry()
+
+# Initialize T, R matrices
+T = hou.hmath.buildTranslate(1, 0, 0)  # 4x4, move 1 unit along +X axis
+R = hou.hmath.buildRotate(0, 45, 0)  # 4x4, rotate 45 degrees along Y (up) axis
+
+for point in geo.points():  # Iterate over all points
+    P = point.position()  # Get current position
+    new_P = P
+
+    #new_P = P * T  # P is treated as row vector
+
+    #new_P = T * P  # This does not work - as expected
+
+    #new_P = P * T * R  # Translate, rotate
+
+    #new_P = R * T * P  # This does not work - as expected
+
+    point.setPosition(new_P)  # Set new position
+~~~
+
+At first we import `hou` module, store reference to processed geometry and create `T, R` matrices for translation and rotation. See [`hmath`](https://www.sidefx.com/docs/houdini/hom/hou/hmath.html) docs, `T, R` are of type [`hou.Matrix4`](https://www.sidefx.com/docs/houdini/hom/hou/Matrix4.html) and are in row-major form.
+
+~~~ Python linenumbers
+import hou
+
+node = hou.pwd()
+geo = node.geometry()
+
+# Initialize T, R matrices
+T = hou.hmath.buildTranslate(1, 0, 0)  # 4x4, move 1 unit along +X axis
+R = hou.hmath.buildRotate(0, 45, 0)  # 4x4, rotate 45 degrees along Y (up) axis
+~~~
+
+Then we iterate over each point, modifying its position.
+
+~~~ Python linenumbers
+for point in geo.points():  # Iterate over all points
+    P = point.position()  # Get current position
+    new_P = P
+
+    # ...
+
+    point.setPosition(new_P)  # Set new position
+~~~
+
+Now take a look at the following 4 lines. Try uncommenting each of them individually to see results or errors.
+
+~~~ Python linenumbers
+    #new_P = P * T  # P is treated as row vector
+
+    #new_P = T * P  # This does not work - as expected
+
+    #new_P = P * T * R  # Translate, rotate
+
+    #new_P = R * T * P  # This does not work - as expected
+~~~
+
+We know from the documentation that vectors are treated as row vectors, so this behaves as expected: `new_P = P * T` is the correct way to translate `P` by `T`. `new_P = T * P` does not work because `P` is row vector, not column one.
+
+![`P * T`](images/xform_vex_2.png width="400px")
+
+To combine translation, rotation transformations, we can do the following: `new_P = P * T * R`. `new_P = R * T * P` does not work again, nothing new here.
+
+![`P * T * R`](images/xform_vex_3.png width="400px")
+
+What I've done might seem simple and as expected. But hold on, it will be contrasted to VEX later in this post.
+
+Note some details about the type of `P, new_P` variables. They are actually of [`hou.Vector3`](https://www.sidefx.com/docs/houdini/hom/hou/Vector3.html) type. When we multiply `P * T`, Python calls [`P.__mul__(T)`](https://www.sidefx.com/docs/houdini/hom/hou/Vector3.html#__mul__), which treats `P` automatically as position, or a [`hou.Vector4`](https://www.sidefx.com/docs/houdini/hom/hou/Vector4.html) with 4th component set to 1. This implementation detail allows us to multiply `hou.Vector3` with `hou.Matrix4`.
+
+I generally like this approach, although the implicit treatment of `hou.Vector3`s as positions is not ideal in my opinion.
+
+# How numpy does it
+
+This is how I'd do the same transformations, but with numpy.
+
+Create a _Python SOP_ again with the following snippet. I will go over it too.
+
+~~~ Python linenumbers
+import hou
+import numpy as np
+
+node = hou.pwd()
+geo = node.geometry()
+
+# Initialize T_hou, R_hou matrices with the help from hou.hmath
+T_hou = hou.hmath.buildTranslate(1, 0, 0)  # 4x4, move 1 unit along +X axis
+R_hou = hou.hmath.buildRotate(0, 45, 0)  # 4x4, rotate 45 degrees along Y (up) axis
+
+# Create numpy arrays from our hou matrices
+# We know that T, R are row-major matrices
+T = np.array(T_hou.asTupleOfTuples())
+R = np.array(R_hou.asTupleOfTuples())
+
+for point in geo.points():  # Iterate over all points
+    P = np.array(point.position())  # Get current position, store it in numpy array
+    P = np.append(P, 1.0)  # Append 1.0 as the 4th element, effectively treating it as a position
+    P = P.reshape(1, 4)  # Reshape it into a row vector, or 1x4 matrix
+    new_P = P
+    
+    #new_P = P @ T  # P is treated as row vector
+
+    #new_P = T @ P  # This does not work - as expected
+    
+    #new_P = T.T @ P.T  # But we are free to treat P as a column vector and T as a column major matrix with transpose
+
+    #new_P = P @ T @ R  # Translate, rotate
+
+    #new_P = R @ T @ P  # Again, this does not work - as expected
+    
+    #new_P = R.T @ T.T @ P.T  # But with transposes we can do it without issues
+    
+    point.setPosition(new_P.reshape(4))  # Set new position from numpy array
+~~~
+
+You should see similarities with the [HOM](#howhomdoesit) example above. There is however some boilerplate code for converting between `hou` and `numpy` types. I build numpy matrices `T, R` with the help of `hou.hmath` functions, which create `T_hou, R_hou` matrices. When iterating over points, I reshape point's position into a row vector and later set it back to the iterated point.
+
+~~~ Python linenumbers
+import hou
+import numpy as np
+
+node = hou.pwd()
+geo = node.geometry()
+
+# Initialize T_hou, R_hou matrices with the help from hou.hmath
+T_hou = hou.hmath.buildTranslate(1, 0, 0)  # 4x4, move 1 unit along +X axis
+R_hou = hou.hmath.buildRotate(0, 45, 0)  # 4x4, rotate 45 degrees along Y (up) axis
+
+# Create numpy arrays from our hou matrices
+# We know that T, R are row-major matrices
+T = np.array(T_hou.asTupleOfTuples())
+R = np.array(R_hou.asTupleOfTuples())
+
+for point in geo.points():  # Iterate over all points
+    P = np.array(point.position())  # Get current position, store it in numpy array
+    P = np.append(P, 1.0)  # Append 1.0 as the 4th element, effectively treating it as a position
+    P = P.reshape(1, 4)  # Reshape it into a row vector, or 1x4 matrix
+    new_P = P
+    
+    # ...
+    
+    point.setPosition(new_P.reshape(4))  # Set new position from numpy array
+~~~
+
+Now let's take a look at the following 6 lines of code. Numpy uses the `@` operator for matrix multiplication.
+
+~~~ Python linenumbers
+    #new_P = P @ T  # P is treated as row vector
+
+    #new_P = T @ P  # This does not work - as expected
+
+    #new_P = T.T @ P.T  # But we are free to treat P as a column vector and T as a column major matrix with transpose
+
+    #new_P = P @ T @ R  # Translate, rotate
+
+    #new_P = R @ T @ P  # Again, this does not work - as expected
+
+    #new_P = R.T @ T.T @ P.T  # But with transposes we can do it without issues
+~~~
+
+Since we have our position as a row vector and translation as row-major matrix, we can simply do this multiplication: `P @ T`. If we feel like using column-major form, then just transpose everything and swap multiplication order, resulting in the same transformation: `T.T @ P.T`
+
+Trying `T @ P` does not make much sense and results in an error.
+
+![`P @ T`, or `T.T @ P.T`](images/xform_vex_2.png width="400px")
+
+To combine translation and rotation, we can either do `P @ T @ R`, or `R.T @ T.T @ P.T`. Both result in the following transformation.
+
+![`P @ T @ R`, or `R.T @ T.T @ P.T`](images/xform_vex_3.png width="400px")
+
+I like this approach the most because it's explicit and doesn't make any assumptions. Numpy just multiplies matrices and leaves it on us to decide what they represent. Of course as long as we have compatible matrix shapes. We can treat our vectors and matrices in a row-major or column-major forms, with identical results and without much hassle.
+
+To better visualize what's going on, I've written the actual values of our matrices here. $P$ is the currently processed point, $P'$ is the transformed point. $T, R$ are translation, rotation matrices.
+
+Row-major form:
+
+$$ P' = P T R $$
+
+$$
+P' = 
+\begin{bmatrix}
+x & y & z & 1 \\
+\end{bmatrix}
+
+\begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+1 & 0 & 0 & 1 \\
+\end{bmatrix}
+
+\begin{bmatrix}
+0.71 & 0 & -0.71 & 0 \\
+0    & 1 &  0    & 0 \\
+0.71 & 0 &  0.71 & 0 \\
+0    & 0 &  0    & 1 \\
+\end{bmatrix}
+$$
+
+Column-major form, $R^T$ is the transpose of $R$ and so on:
+
+$$ P^{'T} = R^T T^T P^T $$
+
+$$
+P^{'T} = 
+\begin{bmatrix}
+ 0.71 & 0 & 0.71 & 0 \\
+ 0    & 1 & 0    & 0 \\
+-0.71 & 0 & 0.71 & 0 \\
+ 0    & 0 & 0    & 1 \\
+\end{bmatrix}
+
+\begin{bmatrix}
+1 & 0 & 0 & 1 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+\end{bmatrix}
+
+\begin{bmatrix}
+x \\
+y \\
+z \\
+1 \\
+\end{bmatrix}
+$$
+
+# How VEX does it
+
+Having seen [HOM](#howhomdoesit), [numpy](#hownumpydoesit) examples above, let's have a look at VEX.
+
+The whole snippet for _Attribute Wrangle SOP_ is here, I will dissect it below.
+
+~~~ C linenumbers
+// Initialize T, R matrices
+matrix T = ident(); // 4x4
+matrix R = ident(); // 4x4
+
+// Mutate T, R with respective transforms
+translate(T, {1, 0, 0}); // Move 1 unit along +X axis
+rotate(R, radians(45), {0,1,0}); // Rotate 45 degrees along Y (up) axis
+
+// Both cases below work in VEX, producing identical result
+//v@P = T * v@P; // P is treated as a column vector? (or 4x1 matrix), is post-multiplied
+//v@P = v@P * T; // P is treated as a row vector?    (or 1x4 matrix), is pre-multiplied
+
+
+//v@P = T * v@P * R; // Hmm, interesting
+//v@P = (T * v@P) * R; // The same result as above: translate, then rotate
+//v@P = T * (v@P * R); // A different result: rotate, then translate
+
+//v@P = v@P * T * R; // Result: translate, rotate
+//v@P = R * T * v@P; // Result: rotate, translate
+~~~
+
+This section creates 2 matrices stored in variables `T, R` for translation and rotation.
+
+~~~ C linenumbers
+// Initialize T, R matrices
+matrix T = ident(); // 4x4
+matrix R = ident(); // 4x4
+
+// Mutate T, R with respective transforms
+translate(T, {1, 0, 0}); // Move 1 unit along +X axis
+rotate(R, radians(45), {0,1,0}); // Rotate 45 degrees along Y (up) axis
+~~~
+
+Now comes the confusing part. Uncomment either of the two lines below and you will see the same result.
+
+~~~ C linenumbers
+// Both cases below work in VEX, producing identical result
+//v@P = T * v@P; // P is treated as a column vector? (or 4x1 matrix), is post-multiplied
+//v@P = v@P * T; // P is treated as a row vector?    (or 1x4 matrix), is pre-multiplied
+~~~
+
+![Translated cube, `T * v@P`, or `v@P * T`](images/xform_vex_2.png width="400px")
+
+I'd expect one line to result in an error. This would reveal how's vectors treated in VEX. But it didn't.
+
+Then I've tried this: `v@P` should now decide whether it's a row or a column and one multiplication should fail. Again, try uncommenting the lines below (only one at the time).
+
+~~~ C linenumbers
+//v@P = T * v@P * R; // Hmm, interesting
+//v@P = (T * v@P) * R; // The same result as above: translate, then rotate
+//v@P = T * (v@P * R); // A different result: rotate, then translate
+~~~
+
+None of the lines above resulted in an error.
+
+![Result of `T * v@P * R` and `(T * v@P) * R`](images/xform_vex_3.png width="400px")
+
+![`T * (v@P * R)`](images/xform_vex_4.png width="400px")
+
+Now it looks like in `T * v@P * R`, position gets first translated (as a column vector) and then rotated (as a row vector). Still unsure what's going on here. Let's try the following:
+
+~~~ C linenumbers
+//v@P = v@P * T * R; // Result: translate, rotate
+//v@P = R * T * v@P; // Result: rotate, translate
+~~~
+
+![`v@P * T * R`, translate, rotate](images/xform_vex_3.png width="400px")
+
+![`R * T * v@P`, rotate, translate](images/xform_vex_4.png width="400px")
+
+Based on this it seems like VEX's evaluation rules are like this:
+
+- Treat vectors as row vectors, multiplying from left to right
+- If a vector is multiplied by a matrix on the left side, treat it as if it were on the right side
+
+# Conclusion
+
+So perhaps unsurprisingly it seems that VEX treats positions, vectors as row vectors - consistently with HDK, HOM. But it allows for multiplication in cases where it should not be possible. I find doing so really confusing and wouldn't recommend using such style.
+
+I suspect SideFX has made this feature to automatically handle common user errors, but in my opinion at the cost of clarity and transparency of how things work internally.
+
+And the big question again: does VEX treat vectors as column vectors?
+
+![Kind of](images/yesno.jpg width="400px")
+
+That's it for this post :)
+
+# Future work
+
+A similar confusion is in the fact that both `v@P, v@N` attributes are treated as 3-vectors in both VEX and Geometry Spreadsheet. Thus hiding the differentiation between the two, which would be in the 4th element in a 4-vector type. Perhaps Houdini differentiates between the two cases with a different mechanism, e.g. to save memory? But I am digressing now and that would be for another post anyway.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
