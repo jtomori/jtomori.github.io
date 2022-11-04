@@ -1,0 +1,40 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**You can modify environment variables in Generic Generator TOP**
+[ <- ](..) _2022-11-04_
+
+# Why
+
+I've found this tip quite helpful and I think it might not be well known. So I've decided to write a short post about it.
+
+I use _Generic Generator TOP_ all the time. It's really simple to run any program over files in a directory, batch process textures, and so on. It solves many of VFX pipeline needs that I've used to address with ad-hoc shell scripts in the past. 
+
+When a scheduler executes your command locally, it automatically inherits Houdini's environment variables. This is a good default behavior, because your child process has access to the same binaries, libraries, configuration etc. But sometimes I want to have a control about the child process' environment.
+
+# How
+
+Thankfully Generic Generator has a support for it. Click on the gear icon on your node parameters window -> _Edit Parameter Interface..._ -> _Node Properties_ -> Search for _HQueue/Task Environment_ and _Local/Environment Variables_, select them and press the white -> button, which will add those parameters to the node.
+
+![Start with a node](images/gen_before.png width="500px")
+
+![Add parameters](images/gen_add_parms.png width="500px")
+
+![Node with new parameters](images/gen_after.png width="500px")
+
+You can see two new parameter tabs: HQueue, Local. If you don't use HQueue renderfarm then you won't need HQueue parameters.
+
+# Examples
+
+One example is to unset Houdini-specific environment variables. I sometimes do it to speed up startup times of Mantra, when I know that my IFD files are simple and don't rely on any of pipeline tools.
+
+![Unsetting variables](images/gen_unset.png width="500px")
+
+In another case I've used this for integrating a compositing software into TOPs for running some jobs automatically. I configure what to do with environment variables.
+
+![Passing configuration](images/gen_comp.png width="500px")
+
+That's it :), you can read more about this on [SideFX forum](https://www.sidefx.com/forum/topic/75101/?page=1#post-321399) and in the [docs](https://www.sidefx.com/docs/houdini/tops/schedulers.html#jobparms).
+
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
