@@ -1,0 +1,457 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**Using Houdini with virtual environment**
+[ <- ](..) _2022-11-XX_
+
+# Intro
+
+Houdini ships with a Python interpreter and a bunch of useful libraries. However it's often useful to install additional Python modules to be used with Houdini. In this post I will explain how to use Houdini with Python virtual environment and how to install new modules with pip. As an example I will install the OpenCV Python module and make a simple COP node with it.
+
+I will use Houdini 19.0.720 on Windows and Linux. Exact versions shouldn't matter though, the same approach should work with older/newer Houdini versions.
+
+I will assume a basic exposure to using a shell, Python modules and virtual environments.
+
+The following locations will be used in this post:
+
+- Houdini install location
+  - `/opt/hfs19.0.720` on Linux (🐧)
+  - `C:\Program Files\Side Effects Software\Houdini 19.0.720` on Windows (🪟)
+- Virtual environment location
+  - `/home/juraj/hou_venv`
+  - `C:\Users\Juraj\hou_venv`
+  - This is the working directory for majority of commands in this post
+
+I will use the terms _virtual environment_ and _venv_ interchangeably. I will do the same with terms _Python modules_ and _Python packages_. Those terms are not identical, but similar enough for the needs of this post.
+
+# Creating a virtual environment
+
+Let's start by creating an empty virtual environment. That can be done with the module [`venv`](https://docs.python.org/3/library/venv.html), which has been part of the standard library since Python 3.3.
+
+Speaking of Python versions - it's the best to create a virtual environment with the same Python version as the one that Houdini ships with. Or at least matching major, minor version parts. This will ensure that our new modules work as expected.
+
+You can find Houdini's Python version easily, either by running the `hython` program, or by opening _Python Shell_ pane in Houdini. In either case I see the following on Linux and Windows:
+
+~~~ python
+🐧
+Python 3.7.13 (default, Jun 14 2022, 11:41:42) 
+[GCC 9.3.1 20200408 (Red Hat 9.3.1-2)] on linux
+Houdini 19.0.720 hou module imported.
+Type "help", "copyright", "credits" or "license" for more information.
+~~~
+
+~~~ python
+🪟
+XYZ
+~~~
+
+On linux I have Python 3.7.15 installed with a package manager, on Windows I have 3.7.9 installed from [python.org](https://www.python.org/downloads/).
+
+Go to an empty folder where we want to create virtual environment in and create it:
+
+~~~ bash
+🐧
+$ cd /home/juraj/hou_venv # Enter the virtual environment location
+
+$ python3.7 -m venv . # Create virtual environment in the current directory
+
+$ tree ../hou_venv -L 4 # Let's take a look at what gets created
+../hou_venv
+├── bin
+│   ├── activate
+│   ├── activate.csh
+│   ├── activate.fish
+│   ├── easy_install
+│   ├── easy_install-3.7
+│   ├── pip
+│   ├── pip3
+│   ├── pip3.7
+│   ├── python -> python3.7
+│   ├── python3 -> python3.7
+│   └── python3.7 -> /usr/bin/python3.7
+├── include
+├── init.sh
+├── lib
+│   └── python3.7
+│       └── site-packages
+│           ├── easy_install.py
+│           ├── pip
+│           ├── pip-22.0.4.dist-info
+│           ├── pkg_resources
+│           ├── __pycache__
+│           ├── setuptools
+│           └── setuptools-47.1.0.dist-info
+├── lib64 -> lib
+└── pyvenv.cfg
+~~~
+
+~~~ cmd
+🪟
+XYZ
+~~~
+
+To use the virtual environment, we need to activate it first. After activating it we can check installed packages and we should see an empty Python virtual environment.
+
+~~~ bash
+🐧
+$ source bin/activate # Activate our new virtual environment
+
+(hou_venv)$ pip freeze # List available packages (nothing gets printed out)
+~~~
+
+~~~ cmd
+🪟
+XYZ
+~~~
+
+Note the `(hou_venv)` indicator in shell showing that we have a virtual environment _hou_venv_ activated.
+
+We have an empty virtual environment now. Let's digress for a bit to talk about virtual environments and after that we will use our new virtual environment with Houdini.
+
+# A short digression about where Python looks for packages
+
+At this point I should briefly explain how Python is aware of our virtual environment and where it looks for installed packages.
+
+We can check search paths for Python packages by inspecting [`sys.path`](https://docs.python.org/3/library/sys.html#sys.path):
+
+~~~ bash
+🐧
+(hou_venv)$ python -c "import sys;print(sys.path)" # Print sys.path from venv's Python
+['', '/usr/lib/python37.zip', '/usr/lib/python3.7', '/usr/lib/python3.7/lib-dynload', 
+'/home/juraj/hou_venv/lib/python3.7/site-packages']
+~~~
+
+~~~ cmd
+🪟
+XYZ
+~~~
+
+This includes paths to modules in the standard library, which are reused from the system Python installation. At the end you can see the path to the `site-packages` folder containing our new modules in our virtual environment.
+
+But this behavior is dependent on the location of our Python binary that we run. For example the Python binary shipped with Houdini won't see our virtual environment's packages, even if it's been activated.
+
+~~~ bash
+🐧
+(hou_venv)$ /opt/hfs19.0.720/python/bin/python -c "import sys;print(sys.path)" # Print sys.path from Houdini's Python
+['', '/opt/hfs19.0.720/python/lib/python37.zip', '/opt/hfs19.0.720/python/lib/python3.7', 
+'/opt/hfs19.0.720/python/lib/python3.7/lib-dynload', 
+'/opt/hfs19.0.720/python/lib/python3.7/site-packages']
+~~~
+
+~~~ cmd
+🪟
+XYZ
+~~~
+
+The reason for this is that Python doesn't check our environment variables (set by the venv activation script) for determining whether it's in a virtual environment. It rather checks for the presence of `pyvenv.cfg` relative to the Python's executable. Take a look at the following commands:
+
+~~~ bash
+🐧
+(hou_venv)$ which python # With virtual environment activated, python refers to this executable
+/home/juraj/hou_venv/bin/python
+
+(hou_venv)$ python -c "import sys;print(sys.path)" # We can see our venv here
+['', '/usr/lib/python37.zip', '/usr/lib/python3.7', '/usr/lib/python3.7/lib-dynload', 
+'/home/juraj/hou_venv/lib/python3.7/site-packages']
+
+(hou_venv)$ /usr/bin/python3.7 -c "import sys;print(sys.path)" # Calling system's python directly doesn't include our venv packages
+['', '/usr/lib/python37.zip', '/usr/lib/python3.7', '/usr/lib/python3.7/lib-dynload', 
+'/usr/local/lib/python3.7/dist-packages', '/usr/lib/python3/dist-packages']
+
+(hou_venv)$ mv pyvenv.cfg pyvenv.cfg_hidden # If we hide pyvenv.cfg then our virtual environment's python is no longer aware of venv's packages
+
+(hou_venv)$ python -c "import sys;print(sys.path)"
+['', '/usr/lib/python37.zip', '/usr/lib/python3.7', '/usr/lib/python3.7/lib-dynload', 
+'/usr/local/lib/python3.7/dist-packages', '/usr/lib/python3/dist-packages']
+
+(hou_venv)$ mv pyvenv.cfg_hidden pyvenv.cfg # Let's restore pyvenv.cfg back
+
+(hou_venv)$ deactivate # Let's deactivate our virtual environment
+
+$ /home/juraj/hou_venv/bin/python -c "import sys;print(sys.path)" # We can see that we can access venv's packages by calling its python executable, without the need to activate it
+['', '/usr/lib/python37.zip', '/usr/lib/python3.7', '/usr/lib/python3.7/lib-dynload', 
+'/home/juraj/hou_venv/lib/python3.7/site-packages']
+
+$ /opt/hfs19.0.720/bin/hython -c "import sys;print(sys.path)" # Let's see what modules hython imports by default
+['', 'ls', '/opt/hfs19.0.720/python/lib/python3.7/site-packages-ui-forced', 
+'/opt/hfs19.0.720/python/lib/python3.7/site-packages-forced', '', 
+'/opt/hfs19.0.720/python/lib/python37.zip', '/opt/hfs19.0.720/python/lib/python3.7', 
+'/opt/hfs19.0.720/python/lib/python3.7/lib-dynload', 
+'/opt/hfs19.0.720/python/lib/python3.7/site-packages', '/opt/hfs19.0.720/packages/kinefx/python3.7libs', 
+'/opt/hfs19.0.720/houdini/python3.7libs', '/opt/hfs19.0.720/packages/kinefx/viewer_states', 
+'/opt/hfs19.0.720/houdini/viewer_states', '/opt/hfs19.0.720/packages/kinefx/viewer_handles', 
+'/opt/hfs19.0.720/houdini/viewer_handles', '/opt/hfs19.0.720/python/lib/python3.7/site-packages']
+~~~
+
+~~~ cmd
+🪟
+XYZ
+~~~
+
+# Using Houdini with our virtual environment
+
+Before we install anything into our new virtual environment, we should make it aware of Python modules shipped with Houdini. If we install new packages with pip in our venv, we don't want to install some of Houdini's modules again, as this could cause some issues later on. As an example, we want to use the `numpy` (OpenCV's dependency) module from Houdini, we don't want pip to install it again in our venv. Additionally, we want Houdini to be able to use our venv's future modules, like OpenCV.
+
+The safest solution would
+
+- enable us to call venv's Python and see Houdini's modules (this will ensure that venv's pip does not install duplicates), and
+- enable us to call Houdini's python (`hython`) and see our venv's modules (so that we can actually use them in Houdini)
+
+In addition to using venv's python executable for controling what modules are visible, we can set environment variable [`PYTHONPATH`](https://docs.python.org/3.7/using/cmdline.html#envvar-PYTHONPATH) to include additional folders containing desired modules. This gives us a granular control about what modules are visible to Python in our environment. This lets us connect our venv with Houdini.
+
+I prefer writing small scripts to make the environment reproducible and easy to test.
+
+Create `hou_venv_init.sh` for Linux in venv's parent directory, e.g. `/home/juraj/hou_venv_init.sh`:
+
+~~~ sh linenumbers
+#!/bin/sh
+
+# Activate venv
+source /home/juraj/hou_venv/bin/activate
+
+# Make our venv's modules visible to hython
+export PYTHONPATH=/home/juraj/hou_venv/lib/python3.7/site-packages
+
+# Add Houdini's modules visible to venv's python
+export PYTHONPATH=$PYTHONPATH:/opt/hfs19.0.720/python/lib/python3.7/site-packages-forced:/opt/hfs19.0.720/python/lib/python3.7/site-packages
+
+# Add Houdini's executables to our PATH env var, this lets us call hython, houdini directly
+export PATH=/opt/hfs19.0.720/bin:$PATH
+
+~~~
+
+Or `hou_venv_init.bat` for Windows:
+
+~~~ cmd linenumbers
+XYZ
+~~~
+
+I don't need to include all of Houdini-specific modules, just those that are general Python modules available on [PyPI](https://pypi.org/). So I am ignoring the folder `/opt/hfs19.0.720/houdini/python3.7libs` and folders specific to kinefx, viewer states etc.
+
+**Note for linux users:** Houdini 19.0.720 on Linux ships with pip 22.0.4, unlike on Windows which doesn't include pip. This could lead to errors if there's a large version difference between your venv and Houdini pip versions. One easy fix is to run `(hou_venv)$ python -m pip install --upgrade pip==22.0.4` from the venv, which will match venv's pip version to the version included in Houdini. Windows users don't need to do this step.
+
+Let's source the initialization script and see if Houdini modules are visible to the venv. I'm calling this from the directory where `hou_venv_init.sh` was created (`/home/juraj/`):
+
+~~~ bash
+🐧
+(hou_venv)$ deactivate # Deactivate our venv
+
+$ cd .. # Move to the parent directory
+
+$ source hou_venv_init.sh # Call our initialization script
+
+(hou_venv)$ pip freeze # List available packages
+asn1crypto==0.24.0
+bcrypt==3.1.7
+certifi==2018.1.18
+cffi==1.12.3
+chardet==3.0.4
+click==7.1.2
+cryptography==2.7
+demjson==2.2.4
+ecdsa==0.13
+Flask==1.0.3
+Flask-Script==2.0.6
+furl==2.1.0
+future==0.18.2
+Genshi==0.7.3
+idna==2.6
+imageio==2.6.1
+itsdangerous==0.24
+Jinja2==2.10.1
+libsass==0.19.2
+lxml==4.3.4
+lz4==3.1.0
+Mako==1.0.12
+MarkupSafe==0.23
+nose==1.3.7
+numpy==1.19.5
+orderedmultidict==1.0.1
+paramiko==2.6.0
+Pillow==6.1.0
+plumbum==1.6.7
+psutil==5.8.0
+pycrypto==2.6.1
+pycurl==7.43.0.3
+Pygments==2.4.2
+PyNaCl==1.3.0
+PyOpenGL==3.1.1a1
+pyparsing==2.4.7
+pytz==2019.3
+requests==2.18.4
+rpyc==4.1.0
+simplejson==3.16.0
+six==1.13.0
+urllib3==1.22
+Werkzeug==0.15.4
+Whoosh==3.0.0
+~~~
+
+~~~ cmd
+🪟
+XYZ
+~~~
+
+Congratulations, now we have a virtual environment aware of Houdini modules (and vice versa), thanks to our small initialization script.
+
+# Installing OpenCV
+
+Let's install OpenCV with pip into our venv now.
+
+~~~ bash
+🐧
+(hou_venv)$ pip install opencv-python # Install OpenCV
+Collecting opencv-python
+  Downloading opencv_python-4.6.0.66-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (60.9 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 60.9/60.9 MB 34.5 MB/s eta 0:00:00
+Requirement already satisfied: numpy>=1.14.5 in /opt/hfs19.0.720/python/lib/python3.7/site-packages (from opencv-python) (1.19.5)
+Installing collected packages: opencv-python
+Successfully installed opencv-python-4.6.0.66
+~~~
+
+~~~ cmd
+🪟
+XYZ
+~~~
+
+The line `Requirement already satisfied: numpy>=1.14.5 in /opt/hfs19.0.720...` indicates that pip is aware of Houdini's Python modules and that's exactly what we want.
+
+We can also check venv's folder structure and the updated pip packages list.
+
+<details>
+<summary>Click to expand</summary>
+~~~ bash
+🐧
+(hou_venv)$ tree hou_venv -L 4
+hou_venv
+├── bin
+│   ├── activate
+│   ├── activate.csh
+│   ├── activate.fish
+│   ├── easy_install
+│   ├── easy_install-3.7
+│   ├── pip
+│   ├── pip3
+│   ├── pip3.7
+│   ├── python -> python3.7
+│   ├── python3 -> python3.7
+│   └── python3.7 -> /usr/bin/python3.7
+├── include
+├── lib
+│   └── python3.7
+│       └── site-packages
+│           ├── cv2
+│           ├── easy_install.py
+│           ├── opencv_python-4.6.0.66.dist-info
+│           ├── opencv_python.libs
+│           ├── pip
+│           ├── pip-22.0.4.dist-info
+│           ├── pkg_resources
+│           ├── __pycache__
+│           ├── setuptools
+│           └── setuptools-47.1.0.dist-info
+├── lib64 -> lib
+└── pyvenv.cfg
+
+(hou_venv)$ pip freeze
+asn1crypto==0.24.0
+bcrypt==3.1.7
+certifi==2018.1.18
+cffi==1.12.3
+chardet==3.0.4
+click==7.1.2
+cryptography==2.7
+demjson==2.2.4
+ecdsa==0.13
+Flask==1.0.3
+Flask-Script==2.0.6
+furl==2.1.0
+future==0.18.2
+Genshi==0.7.3
+idna==2.6
+imageio==2.6.1
+itsdangerous==0.24
+Jinja2==2.10.1
+libsass==0.19.2
+lxml==4.3.4
+lz4==3.1.0
+Mako==1.0.12
+MarkupSafe==0.23
+nose==1.3.7
+numpy==1.19.5
+opencv-python==4.6.0.66
+orderedmultidict==1.0.1
+paramiko==2.6.0
+Pillow==6.1.0
+plumbum==1.6.7
+psutil==5.8.0
+pycrypto==2.6.1
+pycurl==7.43.0.3
+Pygments==2.4.2
+PyNaCl==1.3.0
+PyOpenGL==3.1.1a1
+pyparsing==2.4.7
+pytz==2019.3
+requests==2.18.4
+rpyc==4.1.0
+simplejson==3.16.0
+six==1.13.0
+urllib3==1.22
+Werkzeug==0.15.4
+Whoosh==3.0.0
+~~~
+
+~~~ cmd
+🪟
+XYZ
+~~~
+</details>
+
+Now we should be able to import the `cv2` module in Houdini, or `hython`, which is a Python interpreter with Houdini modules imported.
+
+~~~ bash
+🐧
+(hou_venv)$ python # Check venv's python
+Python 3.7.16 (default, Dec  7 2022, 01:12:19) 
+[GCC 9.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import cv2
+>>> exit()
+
+(hou_venv)$ hython # Check Houdini's hython
+Python 3.7.13 (default, Jun 14 2022, 11:41:42) 
+[GCC 9.3.1 20200408 (Red Hat 9.3.1-2)] on linux
+Houdini 19.0.720 hou module imported.
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import cv2
+>>> exit()
+
+(hou_venv)$ houdini # Launch Houdini and try importing OpenCV in Python Shell pane
+~~~
+
+~~~ cmd
+🪟
+XYZ
+~~~
+
+![OpenCV successfully imported in Houdini](images/houdini_cv2_import.png width="600px")
+
+If we don't see any errors then it means that our setup works well and we can now go and make something useful with it.
+
+# Making a simple COP node using OpenCV
+
+This section will demonstrate a basic usage of OpenCV in Houdini, for example detecting faces in COPs. Refer to Houdini docs about making [Python COPs](https://www.sidefx.com/docs/houdini/hom/pythoncop.html) for detailed explanation of the following steps.
+
+First, create a new Python filter COP:
+
+![Click on New Asset...](images/houdini_cv2_new_asset.png) ![And create a new Python Compositing Filter](images/houdini_cv2_new_cop.png)
+
+Now you can go to an _Image Network_ and create our new node and edit its properties:
+
+![Create Face Detect](images/houdini_cv2_tab.png) ![Click on Type Properties...](images/houdini_cv2_menu.png)
+
+We can see some default functionality in the _Code_ tab. This is the place where we will define our image processing.
+
+![Some default code](images/houdini_cv2_type_properties.png)
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
