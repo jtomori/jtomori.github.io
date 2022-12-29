@@ -1,21 +1,14 @@
 <meta charset="utf-8" lang="en">
 <link href="../styles.css" rel="stylesheet">
 
-**Using Houdini with virtual environment**
+**Houdini, venv, OpenCV and cats**
 [ <- ](..) _2022-11-XX_
-
-*TODO* 
-
-- show where classiiers are stored on lnx, win
-- https://github.com/opencv/opencv/tree/master/data/haarcascades
-- https://docs.opencv.org/3.4/d1/de5/classcv_1_1CascadeClassifier.html#aaf8181cb63968136476ec4204ffca498
-- https://docs.opencv.org/4.x/d6/d6e/group__imgproc__draw.html#ga07d2f74cadcf8e305e810ce8eed13bc9
-- add next steps - make it work with other bit depths, make classifier selection with an auto-populated menu, store the face detection area in an Alpha image plane (for further compositing use)
-- update title?
 
 # Intro
 
-Houdini ships with a Python interpreter and a bunch of useful libraries. However it's often useful to install additional Python modules to be used with Houdini. In this post I will explain how to use Houdini with Python virtual environment and how to install new modules with pip. As an example I will install the OpenCV Python module and make a simple COP node with it.
+Houdini ships with a Python interpreter and a bunch of useful libraries. However it's often useful to install additional Python modules to be used with Houdini. In this post I will explain how to use Houdini with Python virtual environment and how to install new modules with pip. As an example I will install the OpenCV Python module and make a simple facial detection COP node with it.
+
+![Cool, isn't it?](images/houdini_cv2_banner.jpg)
 
 I will use Houdini 19.0.720 on Windows and Linux. Exact versions shouldn't matter though, the same approach should work with older/newer Houdini versions.
 
@@ -505,7 +498,7 @@ def cook(cop_node, plane, resolution):
         input_cop.allPixelsAsString(plane), dtype=np.uint8).reshape(
         resolution[1], resolution[0], 3).copy()
 
-    # Flip vertically for OpenCV, Houdini uses a different convention than OpenCV
+    # Flip vertically for OpenCV - Houdini uses a different convention than OpenCV
     pixels = cv2.flip(pixels, 0)
 
     # Load a classifier included with OpenCV
@@ -530,26 +523,52 @@ This code expects a couple of node parameters, let's add them too, in the _Param
 
  Name | Default value
 ------|--------------
-cascadeClassifier | `haarcascade_frontalcatface_extended.xml`
+cascadeClassifier | haarcascade_frontalcatface_extended.xml
 scaleFactor | 1.1
 minNeighbors | 3
-color | `1, 0, 0`
+color | 1, 0, 0
 thickness | 1
   [Node parameters]
 
-![Edit node parameters](images/houdini_cv2_parms.png)
+![Node parameters](images/houdini_cv2_parms.png)
 
 ![Default values](images/houdini_cv2_parms2.png width="400px")
 
 Here's a short explanation of parameters
 
-- **cascadeClassifier** - 
-- **scaleFactor, minNeighbors** - 
-- **color, thickness** - 
+- **cascadeClassifier** specifies name of a pre-trained Haar-cascade classifier, stored in XML
+  - Our code refers to classifiers included with the OpenCV module, they can be found at
+    - `hou_venv/lib/python3.7/site-packages/cv2/data/` on Linux
+    - `XYZ` on Windows
+  - They can be found also in the [OpenCV repository](https://github.com/opencv/opencv/tree/master/data/haarcascades)
+  - Here's a list for reference
+    - `haarcascade_fullbody.xml`
+    - `haarcascade_lowerbody.xml`
+    - `haarcascade_frontalface_alt_tree.xml`
+    - `haarcascade_eye_tree_eyeglasses.xml`
+    - `haarcascade_eye.xml`
+    - `haarcascade_frontalface_alt2.xml`
+    - `haarcascade_upperbody.xml`
+    - `haarcascade_russian_plate_number.xml`
+    - `haarcascade_frontalcatface.xml`
+    - `haarcascade_smile.xml`
+    - `haarcascade_profileface.xml`
+    - `haarcascade_frontalcatface_extended.xml`
+    - `haarcascade_righteye_2splits.xml`
+    - `haarcascade_licence_plate_rus_16stages.xml`
+    - `haarcascade_lefteye_2splits.xml`
+    - `haarcascade_frontalface_default.xml`
+    - `haarcascade_frontalface_alt.xml  `
+- **scaleFactor, minNeighbors** are parameters to the [`detectMultiScale()`](https://docs.opencv.org/3.4/d1/de5/classcv_1_1CascadeClassifier.html#aaf8181cb63968136476ec4204ffca498) function, which detects faces
+- **color, thickness** are parameters to the [`rectangle()`](https://docs.opencv.org/4.x/d6/d6e/group__imgproc__draw.html#ga07d2f74cadcf8e305e810ce8eed13bc9) function, which draws the rectangle
 
-Note that due to code simplification our COP will work only with `8 Bit Integer` input image plane, which can be set with a **Convert COP** node.
+Now let's see how we can use our node and make something cool with it.
 
-Othwerwise you'd see an error like this:
+# Using our Face Detect COP
+
+One limitation of our Python facial detection code is that it will work only with `8 Bit Integer` inputs, which can be set with a **Convert COP** node. This would be relatively easy to overcome, but I've decided not to, in order to keep the Python code simple for this post.
+
+Othwerwise you'd see an error similar to this one:
 
 ~~~ none linenumbers
 Error 
@@ -558,5 +577,25 @@ File "<stdin>", line 1, in <module>
 File "<stdin>", line 36, in cook
 ValueError: cannot reshape array of size 2439420 into shape (545,746,3)
 ~~~
+
+Our new node is relatively simple to use, replicate my setup and it should work well for you.
+
+![COP setup](images/houdini_cv2_smudge.png)
+
+![Another cat](images/houdini_cv2_cat.png)
+
+![Multiple classifiers](images/houdini_cv2_cage.png)
+
+# Conclusion, next steps
+
+Hopefully you can see that it can be quite useful to use venv with Houdini. Now you can combine the rich ecosystem of Python packages with Houdini. Additional benefit of using venvs is the separation of development environments - you could have a separate venv for each project/tool you are working on, without package version clashes and other interferences. You can store your package dependencies in [`requirements.txt`](https://pip.pypa.io/en/stable/reference/requirements-file-format/), making it reproducible in the future, or on different computers.
+
+Unfortunately there's a bit of boilerplate involved, but it's usually just a one-time upfront cost. If you are aware of a simpler workflow then I'd be really interested in knowing it! :) This stuff was even more complicated in the past with Houdini and Python 2.7, but luckily those dark times are over.
+
+There are plenty of further improvements we could do to make our node more useful. Some ideas, in random order:
+
+- Make it work with more image plane bit depths
+- Make the **cascadeClassifier** parameter an auto-populated menu for easier selection
+- Store the detected face in an Alpha image plane, so that it can be used in downstream compositing nodes
 
 <!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
