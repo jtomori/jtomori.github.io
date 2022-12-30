@@ -44,12 +44,14 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ~~~ python
 🪟
-XYZ
+Python 3.7.13 (1 file(s) copied., Jun 14 2022, 11:48:46) [MSC v.1929 64 bit (AMD64)] on win32
+Houdini 19.0.720 hou module imported.
+Type "help", "copyright", "credits" or "license" for more information.
 ~~~
 
 On linux I have Python 3.7.15 installed with a package manager, on Windows I have 3.7.9 installed from [python.org](https://www.python.org/downloads/).
 
-Go to an empty folder where we want to create virtual environment in and create it:
+Go to an empty folder where we want to create virtual environment in and create it. I will put comments only next to the Linux commands, Windows will do the same steps, but the commands might differ slightly.
 
 ~~~ bash
 🐧
@@ -89,8 +91,46 @@ $ tree ../hou_venv -L 4 # Let's take a look at what gets created
 
 ~~~ cmd
 🪟
-XYZ
+>cd C:\Users\Juraj\hou_venv
+
+>python -m venv .
+
+>tree /A /F
+C:.
+|   pyvenv.cfg
+|
++---Include
++---Lib
+|   \---site-packages
+|       |   easy_install.py
+|       |
+|       +---pip
+|       |
+|       +---pip-20.1.1.dist-info
+|       |
+|       +---pkg_resources
+|       |
+|       +---setuptools
+|       |
+|       +---setuptools-47.1.0.dist-info
+|       |
+|       \---__pycache__
+|
+\---Scripts
+        activate
+        activate.bat
+        Activate.ps1
+        deactivate.bat
+        easy_install-3.7.exe
+        easy_install.exe
+        pip.exe
+        pip3.7.exe
+        pip3.exe
+        python.exe
+        pythonw.exe
 ~~~
+
+(I've truncated `tree`'s output on Windows.)
 
 To use the virtual environment, we need to activate it first. After activating it we can check installed packages and we should see an empty Python virtual environment.
 
@@ -103,7 +143,9 @@ $ source bin/activate # Activate our new virtual environment
 
 ~~~ cmd
 🪟
-XYZ
+>call Scripts\activate
+
+(hou_venv)>pip freeze
 ~~~
 
 Note the `(hou_venv)` indicator in shell showing that we have a virtual environment _hou_venv_ activated.
@@ -125,7 +167,9 @@ We can check search paths for Python packages by inspecting [`sys.path`](https:/
 
 ~~~ cmd
 🪟
-XYZ
+(hou_venv)>python -c "import sys;print(sys.path)"
+['', 'C:\\python\\3.7.9\\python37.zip', 'C:\\python\\3.7.9\\DLLs', 'C:\\python\\3.7.9\\lib', 
+'C:\\python\\3.7.9', 'C:\\Users\\Juraj\\hou_venv', 'C:\\Users\\Juraj\\hou_venv\\lib\\site-packages']
 ~~~
 
 This includes paths to modules in the standard library, which are reused from the system Python installation. At the end you can see path to the `site-packages` folder in our virtual environment, which will contain our new packages.
@@ -142,7 +186,12 @@ But this behavior is dependent on the location of the Python binary that we run.
 
 ~~~ cmd
 🪟
-XYZ
+(hou_venv)>"C:\Program Files\Side Effects Software\Houdini 19.0.720\python37\python.exe" -c "import sys;print(sys.path)"
+['', 'C:\\Program Files\\Side Effects Software\\Houdini 19.0.720\\python37\\python37.zip', 
+'C:\\Program Files\\Side Effects Software\\Houdini 19.0.720\\python37\\DLLs', 
+'C:\\Program Files\\Side Effects Software\\Houdini 19.0.720\\python37\\lib', 
+'C:\\Program Files\\Side Effects Software\\Houdini 19.0.720\\python37', 
+'C:\\Program Files\\Side Effects Software\\Houdini 19.0.720\\python37\\lib\\site-packages']
 ~~~
 
 The reason for this is that Python doesn't check our environment variables (set by the venv activation script) for determining whether it's in a virtual environment. It rather checks for the presence of `pyvenv.cfg` relative to the Python's executable. Take a look at the following commands:
@@ -187,8 +236,46 @@ $ /opt/hfs19.0.720/bin/hython -c "import sys;print(sys.path)" # Let's see what m
 
 ~~~ cmd
 🪟
-XYZ
+(hou_venv)>where python
+C:\Users\Juraj\hou_venv\Scripts\python.exe
+C:\python\3.7.9\python.exe
+
+(hou_venv)>python -c "import sys;print(sys.path)"
+['', 'C:\\python\\3.7.9\\python37.zip', 'C:\\python\\3.7.9\\DLLs', 'C:\\python\\3.7.9\\lib', 
+'C:\\python\\3.7.9', 'C:\\Users\\Juraj\\hou_venv', 'C:\\Users\\Juraj\\hou_venv\\lib\\site-packages']
+
+(hou_venv)>C:\python\3.7.9\python.exe -c "import sys;print(sys.path)"
+['', 'C:\\python\\3.7.9\\python37.zip', 'C:\\python\\3.7.9\\DLLs', 'C:\\python\\3.7.9\\lib', 
+'C:\\python\\3.7.9', 'C:\\python\\3.7.9\\lib\\site-packages']
+
+(hou_venv)>ren pyvenv.cfg pyvenv.cfg_hidden
+
+(hou_venv)>python -c "import sys;print(sys.path)"
+No pyvenv.cfg file
+
+(hou_venv)>ren pyvenv.cfg_hidden pyvenv.cfg
+
+(hou_venv)>deactivate
+
+>C:\Users\Juraj\hou_venv\Scripts\python.exe -c "import sys;print(sys.path)"
+['', 'C:\\python\\3.7.9\\python37.zip', 'C:\\python\\3.7.9\\DLLs', 'C:\\python\\3.7.9\\lib', 
+'C:\\python\\3.7.9', 'C:\\Users\\Juraj\\hou_venv', 'C:\\Users\\Juraj\\hou_venv\\lib\\site-packages']
+
+>"C:\Program Files\Side Effects Software\Houdini 19.0.720\bin\hython.exe" -c "import sys;print(sys.path)"
+['', 'C:\\Program Files\\Side Effects Software\\Houdini 19.0.720\\bin', 
+'C:/PROGRA~1/SIDEEF~1/HOUDIN~1.720/python37/lib/site-packages-ui-forced', 
+'C:/PROGRA~1/SIDEEF~1/HOUDIN~1.720/python37/lib/site-packages-forced', '', 
+'C:\\Program Files\\Side Effects Software\\Houdini 19.0.720\\bin\\python37.zip', 
+'C:\\PROGRA~1\\SIDEEF~1\\HOUDIN~1.720\\python37\\DLLs', 'C:\\PROGRA~1\\SIDEEF~1\\HOUDIN~1.720\\python37\\lib', 
+'C:\\Program Files\\Side Effects Software\\Houdini 19.0.720\\bin', 'C:\\PROGRA~1\\SIDEEF~1\\HOUDIN~1.720\\python37', 
+'C:\\PROGRA~1\\SIDEEF~1\\HOUDIN~1.720\\python37\\lib\\site-packages', 
+'C:/PROGRA~1/SIDEEF~1/HOUDIN~1.720/packages/kinefx/python3.7libs', 'C:/PROGRA~1/SIDEEF~1/HOUDIN~1.720/houdini/python3.7libs', 
+'C:/PROGRA~1/SIDEEF~1/HOUDIN~1.720/packages/kinefx/viewer_states', 'C:/PROGRA~1/SIDEEF~1/HOUDIN~1.720/houdini/viewer_states', 
+'C:/PROGRA~1/SIDEEF~1/HOUDIN~1.720/packages/kinefx/viewer_handles', 'C:/PROGRA~1/SIDEEF~1/HOUDIN~1.720/houdini/viewer_handles', 
+'C:/PROGRA~1/SIDEEF~1/HOUDIN~1.720/python37/lib/site-packages']
 ~~~
+
+Windows' output differs slightly from Linux's: it doesn't allow us to run venv' python executable with the `pyvenv.cfg` being hidden.
 
 # Using Houdini with our virtual environment
 
@@ -225,7 +312,17 @@ export PATH=/opt/hfs19.0.720/bin:$PATH
 Or `hou_venv_init.bat` for Windows, in `C:\Users\Juraj\hou_venv_init.bat`:
 
 ~~~ cmd linenumbers
-XYZ
+@rem Activate venv
+call hou_venv\Scripts\activate
+
+@rem Make our venv's modules visible to hython
+set "PYTHONPATH=C:\Users\Juraj\hou_venv\Lib\site-packages"
+
+@rem Make Houdini's modules visible to venv's python
+set "PYTHONPATH=%PYTHONPATH%;C:\Program Files\Side Effects Software\Houdini 19.0.720\python37\lib\site-packages-forced;C:\Program Files\Side Effects Software\Houdini 19.0.720\python37\lib\site-packages"
+
+@rem Add Houdini's executables to our PATH env var, this lets us call hython, houdini directly
+set "PATH=C:\Program Files\Side Effects Software\Houdini 19.0.720\bin;%PATH%"
 ~~~
 
 I don't need to include all of Houdini-specific modules, just those that are general Python modules available on [PyPI](https://pypi.org/). So I am ignoring the folder `/opt/hfs19.0.720/houdini/python3.7libs` and folders specific to kinefx, viewer states etc.
@@ -291,7 +388,56 @@ Whoosh==3.0.0
 
 ~~~ cmd
 🪟
-XYZ
+(hou_venv)>deactivate
+
+>cd ..
+
+>call hou_venv_init.bat
+
+(hou_venv)>pip freeze
+asn1crypto==0.24.0
+bcrypt==3.1.7
+certifi==2018.1.18
+cffi==1.12.3
+chardet==3.0.4
+click==7.1.2
+cryptography==2.7
+demjson==2.2.4
+ecdsa==0.13
+Flask==1.0.3
+Flask-Script==2.0.6
+furl==2.1.0
+future==0.18.2
+Genshi==0.7.3
+idna==2.6
+imageio==2.6.1
+itsdangerous==0.24
+Jinja2==2.10.1
+lxml==4.3.4
+Mako==1.0.12
+markupsafe==0.23
+nose==1.3.7
+numpy==1.19.5
+orderedmultidict==1.0.1
+paramiko==2.6.0
+Pillow==6.1.0
+plumbum==1.6.7
+psutil==5.8.0
+pycrypto==2.6.1
+pycurl==7.43.0.3
+Pygments==2.4.2
+PyNaCl==1.3.0
+PyOpenGL==3.1.1a1
+pyparsing==2.4.7
+python-lz4==3.1.0
+pytz==2019.3
+requests==2.18.4
+rpyc==4.1.0
+simplejson==3.16.0
+six==1.13.0
+urllib3==1.22
+Werkzeug==0.15.4
+whoosh==3.0.0
 ~~~
 
 Congratulations, now we have a virtual environment aware of Houdini modules (and vice versa), thanks to our small initialization script.
@@ -313,7 +459,13 @@ Successfully installed opencv-python-4.6.0.66
 
 ~~~ cmd
 🪟
-XYZ
+(hou_venv)>pip install opencv-python
+Collecting opencv-python
+  Downloading opencv_python-4.7.0.68-cp37-abi3-win_amd64.whl (38.2 MB)
+     |████████████████████████████████| 38.2 MB 6.4 MB/s
+Requirement already satisfied: numpy>=1.17.0; python_version >= "3.7" in c:\program files\side effects software\houdini 19.0.720\python37\lib\site-packages (from opencv-python) (1.19.5)
+Installing collected packages: opencv-python
+Successfully installed opencv-python-4.7.0.68
 ~~~
 
 The line `Requirement already satisfied: numpy>=1.14.5 in /opt/hfs19.0.720...` indicates that pip is aware of Houdini's Python modules and that's exactly what we want.
@@ -405,7 +557,89 @@ Whoosh==3.0.0
 
 ~~~ cmd
 🪟
-XYZ
+(hou_venv)>tree hou_venv /A /F
+C:\USERS\JURAJ\HOU_VENV
+|   pyvenv.cfg
+|
++---Include
++---Lib
+|   \---site-packages
+|       |   easy_install.py
+|       |
+|       +---cv2
+|       |
+|       +---opencv_python-4.7.0.68.dist-info
+|       |
+|       +---pip
+|       |
+|       +---pip-20.1.1.dist-info
+|       |
+|       +---pkg_resources
+|       |
+|       +---setuptools
+|       |
+|       +---setuptools-47.1.0.dist-info
+|       |
+|       \---__pycache__
+|
+\---Scripts
+        activate
+        activate.bat
+        Activate.ps1
+        deactivate.bat
+        easy_install-3.7.exe
+        easy_install.exe
+        pip.exe
+        pip3.7.exe
+        pip3.exe
+        python.exe
+        pythonw.exe
+
+(hou_venv)>pip freeze
+asn1crypto==0.24.0
+bcrypt==3.1.7
+certifi==2018.1.18
+cffi==1.12.3
+chardet==3.0.4
+click==7.1.2
+cryptography==2.7
+demjson==2.2.4
+ecdsa==0.13
+Flask==1.0.3
+Flask-Script==2.0.6
+furl==2.1.0
+future==0.18.2
+Genshi==0.7.3
+idna==2.6
+imageio==2.6.1
+itsdangerous==0.24
+Jinja2==2.10.1
+lxml==4.3.4
+Mako==1.0.12
+markupsafe==0.23
+nose==1.3.7
+numpy==1.19.5
+opencv-python==4.7.0.68
+orderedmultidict==1.0.1
+paramiko==2.6.0
+Pillow==6.1.0
+plumbum==1.6.7
+psutil==5.8.0
+pycrypto==2.6.1
+pycurl==7.43.0.3
+Pygments==2.4.2
+PyNaCl==1.3.0
+PyOpenGL==3.1.1a1
+pyparsing==2.4.7
+python-lz4==3.1.0
+pytz==2019.3
+requests==2.18.4
+rpyc==4.1.0
+simplejson==3.16.0
+six==1.13.0
+urllib3==1.22
+Werkzeug==0.15.4
+whoosh==3.0.0
 ~~~
 </details>
 
@@ -433,7 +667,20 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ~~~ cmd
 🪟
-XYZ
+(hou_venv)>python
+Python 3.7.9 (tags/v3.7.9:13c94747c7, Aug 17 2020, 18:58:18) [MSC v.1900 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import cv2
+>>> exit()
+
+(hou_venv)>hython
+Python 3.7.13 (1 file(s) copied., Jun 14 2022, 11:48:46) [MSC v.1929 64 bit (AMD64)] on win32
+Houdini 19.0.720 hou module imported.
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import cv2
+>>> exit()
+
+(hou_venv)>houdini
 ~~~
 
 ![OpenCV successfully imported in Houdini](images/houdini_cv2_import.png width="600px")
