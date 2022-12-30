@@ -49,7 +49,7 @@ Houdini 19.0.720 hou module imported.
 Type "help", "copyright", "credits" or "license" for more information.
 ~~~
 
-On linux I have Python 3.7.15 installed with a package manager, on Windows I have 3.7.9 installed from [python.org](https://www.python.org/downloads/).
+On Linux I have Python 3.7.15 installed with a package manager, on Windows I have 3.7.9 installed from [python.org](https://www.python.org/downloads/).
 
 Go to an empty folder where we want to create virtual environment in and create it. I will put comments only next to the Linux commands, Windows will do the same steps, but the commands might differ slightly.
 
@@ -194,7 +194,7 @@ But this behavior is dependent on the location of the Python binary that we run.
 'C:\\Program Files\\Side Effects Software\\Houdini 19.0.720\\python37\\lib\\site-packages']
 ~~~
 
-The reason for this is that Python doesn't check our environment variables (set by the venv activation script) for determining whether it's in a virtual environment. It rather checks for the presence of `pyvenv.cfg` relative to the Python's executable. Take a look at the following commands:
+The reason for this is that Python doesn't check our environment variables (set by the venv activation script) for determining whether it's in a virtual environment. It rather checks for the presence of `pyvenv.cfg` in a location relative to the Python executable. Take a look at the following commands:
 
 ~~~ bash
 🐧
@@ -279,7 +279,7 @@ Windows' output differs slightly from Linux's: it doesn't allow us to run venv' 
 
 # Using Houdini with our virtual environment
 
-Before we install anything into our new virtual environment, we should make it aware of Python modules shipped with Houdini. If we install new packages with pip in our venv, we don't want to install some of Houdini's modules again, as this could cause some issues later on. As an example, we want to use the `numpy` (OpenCV's dependency) module from Houdini, we don't want pip to install it again in our venv. Additionally, we want Houdini to be able to use our venv's future modules, like OpenCV.
+Before we install anything into our new virtual environment, we should make it aware of Python modules shipped with Houdini. If we install new packages with pip in our venv, we don't want to install some of Houdini's modules again, as this could cause some issues later on. As an example, we want to use the `numpy` (OpenCV's dependency) module from Houdini, we don't want pip to install it again in our venv. Additionally, we want Houdini to be able to use our venv's modules, like OpenCV.
 
 The safest solution would:
 
@@ -327,7 +327,7 @@ set "PATH=C:\Program Files\Side Effects Software\Houdini 19.0.720\bin;%PATH%"
 
 I don't need to include all of Houdini-specific modules, just those that are general Python modules available on [PyPI](https://pypi.org/). So I am ignoring the folder `/opt/hfs19.0.720/houdini/python3.7libs` and folders specific to kinefx, viewer states etc.
 
-**Note for linux users:** Houdini 19.0.720 on Linux ships with pip 22.0.4, unlike on Windows which doesn't include pip. This could lead to errors if there's a large version difference between your venv and Houdini pip versions. One easy fix is to run `(hou_venv)$ python -m pip install --upgrade pip==22.0.4` from the venv, which will match venv's pip version to the version included in Houdini. Windows users don't need to do this step.
+**Note for Linux users:** Houdini 19.0.720 on Linux ships with pip 22.0.4, unlike on Windows which doesn't include pip. This could lead to errors if there's a large version difference between your venv and Houdini pip versions. One easy fix is to run `(hou_venv)$ python -m pip install --upgrade pip==22.0.4` from the venv, which will match venv's pip version to the version included in Houdini. Windows users don't need to do this step.
 
 Let's source the initialization script and see if Houdini modules are visible to the venv. I'm calling this from the directory where `hou_venv_init` was created (`/home/juraj/`, or `C:\Users\Juraj`):
 
@@ -786,7 +786,7 @@ Here's a short explanation of parameters
 - **cascadeClassifier** specifies the name of a pre-trained Haar-cascade classifier, stored in XML
   - Our code refers to classifiers included with the OpenCV module, they can be found at
     - `hou_venv/lib/python3.7/site-packages/cv2/data/` on Linux
-    - `XYZ` on Windows
+    - `hou_venv\Lib\site-packages\cv2\data` on Windows
   - They can be found also in the [OpenCV repository](https://github.com/opencv/opencv/tree/master/data/haarcascades)
   - Here's a list for reference
     - `haarcascade_fullbody.xml`
@@ -835,9 +835,9 @@ Our new node is relatively simple to use, replicate my setup and it should work 
 
 # Conclusion, next steps
 
-Hopefully you can see that it can be quite useful to use venv with Houdini. Now you can combine the rich ecosystem of Python packages with Houdini. Additional benefit of using venvs is the separation of development environments - you could have a separate venv for each project/tool you are working on, without package version clashes and other interferences. You can store your package dependencies in [`requirements.txt`](https://pip.pypa.io/en/stable/reference/requirements-file-format/), making it reproducible in the future, or on different computers.
+Hopefully you can see that it can be quite useful to use virtual environment with Houdini. Now you can combine the rich ecosystem of Python packages with Houdini. Additional benefit of using venvs is the separation of development environments - you could have a separate venv for each project/tool you are working on, without package version clashes and other interferences. You can store your package dependencies in [`requirements.txt`](https://pip.pypa.io/en/stable/reference/requirements-file-format/), making it reproducible in the future, or on different computers.
 
-The OpenCV COP node is a rather silly example, but I hope you get the idea. You can use COPs to do some interactive image processing, or do some fancy geometry processing in SOPs, or do something in TOPs, etc. Another potential use is to quickly build a simple-to-use UI for artists.
+The Face Detect COP node is a rather silly example, but I hope you get the idea. You can use COPs to do some interactive image processing, or do some fancy geometry processing in SOPs, or do something in TOPs, etc. Another potential use is to quickly build a simple-to-use UI for artists.
 
 Unfortunately there's a bit of boilerplate involved, but it's usually just a one-time upfront cost. If you are aware of a simpler workflow then I'd be really interested in knowing it! :) This stuff was even more complicated in the past with Houdini and Python 2.7, but luckily those dark times are over.
 
@@ -845,6 +845,6 @@ There are plenty of further improvements we could do to make our node more usefu
 
 - Make it work with more image plane bit depths
 - Make the **cascadeClassifier** parameter an auto-populated menu for easier selection
-- Store the detected face in an Alpha image plane, so that it can be used in downstream compositing nodes
+- Store the detected face in an Alpha image plane, so that it can be used as a mask by downstream compositing nodes
 
 <!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
