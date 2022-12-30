@@ -2,7 +2,7 @@
 <link href="../styles.css" rel="stylesheet">
 
 **Houdini, venv, OpenCV and cats**
-[ <- ](..) _2022-11-XX_
+[ <- ](..) _2022-12-30_
 
 # Intro
 
@@ -108,7 +108,7 @@ XYZ
 
 Note the `(hou_venv)` indicator in shell showing that we have a virtual environment _hou_venv_ activated.
 
-We have an empty virtual environment now. Let's digress for a bit to talk about virtual environments and after that we will use our new virtual environment with Houdini.
+We have an empty virtual environment now. Let's digress for a bit and after that we will use our new virtual environment with Houdini.
 
 # A short digression about where Python looks for packages
 
@@ -128,9 +128,9 @@ We can check search paths for Python packages by inspecting [`sys.path`](https:/
 XYZ
 ~~~
 
-This includes paths to modules in the standard library, which are reused from the system Python installation. At the end you can see the path to the `site-packages` folder containing our new modules in our virtual environment.
+This includes paths to modules in the standard library, which are reused from the system Python installation. At the end you can see path to the `site-packages` folder in our virtual environment, which will contain our new packages.
 
-But this behavior is dependent on the location of our Python binary that we run. For example the Python binary shipped with Houdini won't see our virtual environment's packages, even if it's been activated.
+But this behavior is dependent on the location of the Python binary that we run. For example the Python binary shipped with Houdini won't see our virtual environment's packages, even if it's been activated.
 
 ~~~ bash
 🐧
@@ -194,16 +194,16 @@ XYZ
 
 Before we install anything into our new virtual environment, we should make it aware of Python modules shipped with Houdini. If we install new packages with pip in our venv, we don't want to install some of Houdini's modules again, as this could cause some issues later on. As an example, we want to use the `numpy` (OpenCV's dependency) module from Houdini, we don't want pip to install it again in our venv. Additionally, we want Houdini to be able to use our venv's future modules, like OpenCV.
 
-The safest solution would
+The safest solution would:
 
 - enable us to call venv's Python and see Houdini's modules (this will ensure that venv's pip does not install duplicates), and
 - enable us to call Houdini's python (`hython`) and see our venv's modules (so that we can actually use them in Houdini)
 
-In addition to using venv's python executable for controling what modules are visible, we can set environment variable [`PYTHONPATH`](https://docs.python.org/3.7/using/cmdline.html#envvar-PYTHONPATH) to include additional folders containing desired modules. This gives us a granular control about what modules are visible to Python in our environment. This lets us connect our venv with Houdini.
+In addition to using venv's python executable for controling what modules are visible, we can set the environment variable [`PYTHONPATH`](https://docs.python.org/3.7/using/cmdline.html#envvar-PYTHONPATH) to include additional folders containing desired modules. This gives us a granular control about what modules are visible to Python in our environment. This lets us connect our venv with Houdini.
 
-I prefer writing small scripts to make the environment reproducible and easy to test.
+I prefer writing small shell scripts to make the environment reproducible and easy to test.
 
-Create `hou_venv_init.sh` for Linux in venv's parent directory, e.g. `/home/juraj/hou_venv_init.sh`:
+Create `hou_venv_init.sh` for Linux in venv's parent directory, `/home/juraj/hou_venv_init.sh`:
 
 ~~~ sh linenumbers
 #!/bin/sh
@@ -214,7 +214,7 @@ source /home/juraj/hou_venv/bin/activate
 # Make our venv's modules visible to hython
 export PYTHONPATH=/home/juraj/hou_venv/lib/python3.7/site-packages
 
-# Add Houdini's modules visible to venv's python
+# Make Houdini's modules visible to venv's python
 export PYTHONPATH=$PYTHONPATH:/opt/hfs19.0.720/python/lib/python3.7/site-packages-forced:/opt/hfs19.0.720/python/lib/python3.7/site-packages
 
 # Add Houdini's executables to our PATH env var, this lets us call hython, houdini directly
@@ -222,7 +222,7 @@ export PATH=/opt/hfs19.0.720/bin:$PATH
 
 ~~~
 
-Or `hou_venv_init.bat` for Windows:
+Or `hou_venv_init.bat` for Windows, in `C:\Users\Juraj\hou_venv_init.bat`:
 
 ~~~ cmd linenumbers
 XYZ
@@ -232,7 +232,7 @@ I don't need to include all of Houdini-specific modules, just those that are gen
 
 **Note for linux users:** Houdini 19.0.720 on Linux ships with pip 22.0.4, unlike on Windows which doesn't include pip. This could lead to errors if there's a large version difference between your venv and Houdini pip versions. One easy fix is to run `(hou_venv)$ python -m pip install --upgrade pip==22.0.4` from the venv, which will match venv's pip version to the version included in Houdini. Windows users don't need to do this step.
 
-Let's source the initialization script and see if Houdini modules are visible to the venv. I'm calling this from the directory where `hou_venv_init.sh` was created (`/home/juraj/`):
+Let's source the initialization script and see if Houdini modules are visible to the venv. I'm calling this from the directory where `hou_venv_init` was created (`/home/juraj/`, or `C:\Users\Juraj`):
 
 ~~~ bash
 🐧
@@ -318,7 +318,7 @@ XYZ
 
 The line `Requirement already satisfied: numpy>=1.14.5 in /opt/hfs19.0.720...` indicates that pip is aware of Houdini's Python modules and that's exactly what we want.
 
-We can also check venv's folder structure and the updated pip packages list.
+We can also check venv's folder structure and the updated pip packages list:
 
 <details>
 <summary>Click to expand</summary>
@@ -409,7 +409,7 @@ XYZ
 ~~~
 </details>
 
-Now we should be able to import the `cv2` module in Houdini, or `hython`, which is a Python interpreter with Houdini modules imported.
+Now we should be able to import the `cv2` module in Houdini, or `hython` (which is a Python interpreter with Houdini modules imported).
 
 ~~~ bash
 🐧
@@ -442,7 +442,7 @@ If we don't see any errors then it means that our setup works well and we can no
 
 # Making a simple COP node using OpenCV
 
-This section will demonstrate a basic usage of OpenCV in Houdini, for example detecting faces in COPs. 
+This section will demonstrate a basic usage of OpenCV in Houdini, for example detecting faces in COPs. The point of this example is to show how to use venv together with Houdini, not how to do a reliable face detection.
 
 I will cut some corners in order to simplify the code. I will not be explaining every detail of working with OpenCV or Python COPs either. That is already well documented in documentation. Refer to Houdini docs about making [Python COPs](https://www.sidefx.com/docs/houdini/hom/pythoncop.html) and take a look at [OpenCV's face detection tutorial](https://docs.opencv.org/3.4/db/d28/tutorial_cascade_classifier.html) as well.
 
@@ -536,7 +536,7 @@ thickness | 1
 
 Here's a short explanation of parameters
 
-- **cascadeClassifier** specifies name of a pre-trained Haar-cascade classifier, stored in XML
+- **cascadeClassifier** specifies the name of a pre-trained Haar-cascade classifier, stored in XML
   - Our code refers to classifiers included with the OpenCV module, they can be found at
     - `hou_venv/lib/python3.7/site-packages/cv2/data/` on Linux
     - `XYZ` on Windows
@@ -589,6 +589,8 @@ Our new node is relatively simple to use, replicate my setup and it should work 
 # Conclusion, next steps
 
 Hopefully you can see that it can be quite useful to use venv with Houdini. Now you can combine the rich ecosystem of Python packages with Houdini. Additional benefit of using venvs is the separation of development environments - you could have a separate venv for each project/tool you are working on, without package version clashes and other interferences. You can store your package dependencies in [`requirements.txt`](https://pip.pypa.io/en/stable/reference/requirements-file-format/), making it reproducible in the future, or on different computers.
+
+The OpenCV COP node is a rather silly example, but I hope you get the idea. You can use COPs to do some interactive image processing, or do some fancy geometry processing in SOPs, or do something in TOPs, etc. Another potential use is to quickly build a simple-to-use UI for artists.
 
 Unfortunately there's a bit of boilerplate involved, but it's usually just a one-time upfront cost. If you are aware of a simpler workflow then I'd be really interested in knowing it! :) This stuff was even more complicated in the past with Houdini and Python 2.7, but luckily those dark times are over.
 
