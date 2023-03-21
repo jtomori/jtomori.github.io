@@ -24,4 +24,4 @@ jobs:
         with:
           python-version: '3.x'
       - run: pip install requests
-      - run: python check_links.py
+      - run: python check_links.py || python check_links.py || python check_links.py
