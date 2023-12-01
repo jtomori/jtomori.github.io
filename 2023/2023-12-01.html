@@ -1,0 +1,26 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**Deleting Alembic file loaded in Houdini on Windows**
+[ <- ](..) _2023-12-01_
+
+This is a quick tip / quality of life improvement.
+
+Let's say you have two Houdini sessions open on a Windows: the first one is exporting an Alembic file and the second one is reading it. If you try to delete / overwrite the Alembic file that is already loaded into the second Houdini session, it will fail.
+
+![](images/abc_del.png width="300px") ![](images/abc_rop.png width="300px")
+
+We can confirm that Houdini is keeping the Alembic file open with the [File Locksmith](https://learn.microsoft.com/en-us/windows/powertoys/file-locksmith).
+
+![](images/abc_lock.png width="300px")
+
+One option for fixing this is to close the second Houdini session, delete / overwrite the Alembic file and the start the session again.
+
+But that is slow and unnecessary. There is a better way, in the second Houdini session:
+
+1. Display a _Null SOP_ or another node, so that the geometry from the Alembic file is not visible in the viewport
+  -  Alternatively you can keep the display flag on the _Alembic SOP_ node and switch to _Render View_, or another pane
+2. Press the _Reload Geometry_ button on the _Alembic SOP_ node
+3. Done, you can now delete / overwrite the Alembic file
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
