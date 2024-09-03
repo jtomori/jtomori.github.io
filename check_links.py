@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 urllib3.disable_warnings()
 
 AGENT = os.getenv("AGENT", "Mozilla/5.0 ()")
-SKIPLIST = ["https://linkedin.com", "https://linux.die.net"]
+SKIPLIST = ["https://linkedin.com", "https://linux.die.net", "https://code.visualstudio.com"]
 
 
 def get_status(link):
