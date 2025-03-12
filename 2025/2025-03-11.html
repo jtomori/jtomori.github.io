@@ -38,7 +38,7 @@ At the end I've arrived at the following workflow:
 
 I'll go over those steps below.
 
-I've left out some of the boring steps, but you can read through [this function](https://github.com/jtomori/t3/blob/v1.0/t3/__main__.py#L20-L89) to see the exact implementation.
+I've left out some of the boring steps, but you can read through [this function](https://github.com/jtomori/t3/blob/v1.1/t3/__main__.py#L20-L89) to see the exact implementation.
 
 ## Starting out
 
@@ -66,7 +66,7 @@ On the next day I've noticed that there's an SeamlessExpressive model as well, w
 
 Hearing those results was really motivating. The translation was improved (the selection of languages was smaller, so couldn't test Slovak), the input voice "identity" was preserved quite well and so was intonation, pacing, mood of the input. It felt less Google-Translate-y and more like an audio book for kids.
 
-In terms of the technicalities, I've decided to create a Python module `t3`, whose [command line entry point](https://github.com/jtomori/t3/blob/v1.0/t3/__main__.py) would implement the processing workflow and submodules would contain [inference](https://github.com/jtomori/t3/blob/v1.0/t3/s2st.py) and [utilities](https://github.com/jtomori/t3/blob/v1.0/t3/audio_utils.py) functionality. [Tests](https://github.com/jtomori/t3/blob/v1.0/tests.py) would be helpful for ensuring, debugging functionality and I'd run various [code quality checks](https://github.com/jtomori/t3/blob/v1.0/checks.sh) to keep code clean.
+In terms of the technicalities, I've decided to create a Python module `t3`, whose [command line entry point](https://github.com/jtomori/t3/blob/v1.1/t3/__main__.py) would implement the processing workflow and submodules would contain [inference](https://github.com/jtomori/t3/blob/v1.1/t3/s2st.py) and [utilities](https://github.com/jtomori/t3/blob/v1.1/t3/audio_utils.py) functionality. [Tests](https://github.com/jtomori/t3/blob/v1.1/tests.py) would be helpful for ensuring, debugging functionality and I'd run various [code quality checks](https://github.com/jtomori/t3/blob/v1.1/checks.sh) to keep code clean.
 
 ## Checking the data
 
@@ -118,15 +118,15 @@ I've done this for two reasons - to avoid translating songs which didn't really 
 
 ## Filtering out files without speech
 
-The failed translations above made me realize I needed to categorize speech and non-speech audio files, which a quick Google search revealed to be called Voice Activity Detection (VAD). I've come across [Silero VAD](https://github.com/snakers4/silero-vad) which was [really easy to use](https://github.com/jtomori/t3/blob/v1.0/t3/audio_utils.py#L11-L24) and gave me pretty good results. [With multiprocessing](https://github.com/jtomori/t3/blob/v1.0/t3/__main__.py#L172-L192) it was also pretty quick - just a few seconds to process all audio files in parallel.
+The failed translations above made me realize I needed to categorize speech and non-speech audio files, which a quick Google search revealed to be called Voice Activity Detection (VAD). I've come across [Silero VAD](https://github.com/snakers4/silero-vad) which was [really easy to use](https://github.com/jtomori/t3/blob/v1.1/t3/audio_utils.py#L11-L24) and gave me pretty good results. [With multiprocessing](https://github.com/jtomori/t3/blob/v1.1/t3/__main__.py#L172-L192) it was also pretty quick - just a few seconds to process all audio files in parallel.
 
-To get a good understanding of the speech detection accuracy I've leveraged the categorization I've done above and translated it into [parametrized unit tests](https://github.com/jtomori/t3/blob/v1.0/tests.py#L7-L32). Running these tests revealed that the detection was not perfect - it contained both false positives and false negatives. I've tuned the speech detection confidence threshold according to the number of failed tests and arrived at something what I deemed acceptable for the time being.
+To get a good understanding of the speech detection accuracy I've leveraged the categorization I've done above and translated it into [parametrized unit tests](https://github.com/jtomori/t3/blob/v1.1/tests.py#L7-L32). Running these tests revealed that the detection was not perfect - it contained both false positives and false negatives. I've tuned the speech detection confidence threshold according to the number of failed tests and arrived at something what I deemed acceptable for the time being.
 
 ## Speech-to-speech translation
 
 This was perhaps the most important step. At first I though I'd have to rent a beefier GPU to run the inference, but luckily with GDM disabled I've managed to run both Large and Expressive models. Later I've remembered that my computer has a CPU too and that I can use that to run the inference.
 
-To make inference as quick as possible I stuck with using GPU and I've reworked [Meta's inference script](https://github.com/facebookresearch/seamless_communication/blob/90e2b57ac4d82fa2bfaa25caeffe39ceb8b2ebec/src/seamless_communication/cli/expressivity/predict/predict.py) into [my own one](https://github.com/jtomori/t3/blob/v1.0/t3/s2st.py) which loaded model weights once and then ran inference on multiple inputs. I appreciated Meta's clean code, which made this task pretty straightforward.
+To make inference as quick as possible I stuck with using GPU and I've reworked [Meta's inference script](https://github.com/facebookresearch/seamless_communication/blob/90e2b57ac4d82fa2bfaa25caeffe39ceb8b2ebec/src/seamless_communication/cli/expressivity/predict/predict.py) into [my own one](https://github.com/jtomori/t3/blob/v1.1/t3/s2st.py) which loaded model weights once and then ran inference on multiple inputs. I appreciated Meta's clean code, which made this task pretty straightforward.
 
 This step could be swapped out for another model / service in the future. After this step I output a CSV table with info about duration, category, transcript for checking the data afterwards.
 
@@ -154,7 +154,8 @@ There are still some things I'd like to improve:
 
 Short term:
 
-- Finish the dockerization step as the whole setup grew quite complicated, so at this point it might be easier to keep it isolated in a container (and to simplify sharing)
+- ~~Finish the dockerization step as the whole setup grew quite complicated, so at this point it might be easier to keep it isolated in a container (and to simplify sharing)~~
+  - Done in [v1.1](https://github.com/jtomori/t3?tab=readme-ov-file#v11---2025-03-12)
 
 Long term (not certain yet):
 
