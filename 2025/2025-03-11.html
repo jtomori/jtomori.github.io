@@ -118,7 +118,7 @@ I've done this for two reasons - to avoid translating songs which didn't really 
 
 ## Filtering out files without speech
 
-The failed translations above made me realize I needed to categorize speech and non-speech audio files, which a quick Google search revealed to be called Voice Activity Detection (VAD). I've come across [Silero VAD](https://github.com/snakers4/silero-vad) which was [really easy to use](https://github.com/jtomori/t3/blob/v1.0/t3/audio_utils.py#L11-L24) and gave me pretty good results.
+The failed translations above made me realize I needed to categorize speech and non-speech audio files, which a quick Google search revealed to be called Voice Activity Detection (VAD). I've come across [Silero VAD](https://github.com/snakers4/silero-vad) which was [really easy to use](https://github.com/jtomori/t3/blob/v1.0/t3/audio_utils.py#L11-L24) and gave me pretty good results. [With multiprocessing](https://github.com/jtomori/t3/blob/v1.0/t3/__main__.py#L172-L192) it was also pretty quick - just a few seconds to process all audio files in parallel.
 
 To get a good understanding of the speech detection accuracy I've leveraged the categorization I've done above and translated it into [parametrized unit tests](https://github.com/jtomori/t3/blob/v1.0/tests.py#L7-L32). Running these tests revealed that the detection was not perfect - it contained both false positives and false negatives. I've tuned the speech detection confidence threshold according to the number of failed tests and arrived at something what I deemed acceptable for the time being.
 
