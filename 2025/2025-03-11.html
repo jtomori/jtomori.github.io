@@ -1,0 +1,164 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**TipToi translation**
+[ <- ](..) _2025-03-11_
+
+I'd like to describe my personal project which I've worked on during the past few days.
+
+# TL;DR
+
+I've applied [Meta's SeamlessExpressive](https://github.com/facebookresearch/seamless_communication?tab=readme-ov-file#seamlessexpressive) speech-to-speech translation model to an interactive audio book TipToi to translate it from German into English.
+
+![](https://youtu.be/BwwpeuCH1jM)
+
+I think it's not too bad! :) [link to code repository](https://github.com/jtomori/t3)
+
+# The long version
+
+## Motivation
+
+I like using TipToi when playing with my kids and I had this idea of doing German -> English audio translation in my head for a while. I wasn't sure if the speech-to-speech translation quality would be good enough, but I hoped I'd get something usable (naturally sounding) for my kids.
+
+I haven't done personal projects for a while, so I thought now it's a good time to spend some time on it. I've done similar work (although in another domain) at my job for the past few years, so it's nice to do something as an open source project. I have little experience with audio and applying state of the art machine learning models to it, so that looked like a good excuse to change that.
+
+## Ravensburger TipToi
+
+I think the demo video above demonstrates nicely how TipToi works. TipToi uses [optical identification](https://github.com/entropia/tip-toi-reveng/wiki/PEN-Optical-ID-and-codes) for identifying which sounds to play when it touches the surface. Overall it's a nice and well made toy to have around.
+
+While TipToi's content is stored in it's own proprietary format, there's an awesome [open source community](https://github.com/entropia/tip-toi-reveng) which has reverse engineered large portion of it. This is a very cool effort which has enabled this project and many others. Another project I did in the past was to print out my own books with songs, stories my kids like.
+
+I quite like how TipToi works - to get an audio content for a book you own you just download a respective GME file from [their website](https://service.ravensburger.de/tiptoi%C2%AE/tiptoi%C2%AE_Audiodateien) and copy it over USB to the pen. I like that they don't require any registration, subscription or a silly app to manage the pen. The pen will keep working until it breaks and you can download GME files for new books as long as Ravensburger hosts them.
+
+## Approach
+
+At the end I've arrived at the following workflow:
+
+<object type="image/svg+xml" data="images/t3_diagram.svg" width="470px"></object>
+
+I'll go over those steps below.
+
+I've left out some of the boring steps, but you can read through [this function](https://github.com/jtomori/t3/blob/v1.0/t3/__main__.py#L20-L89) to see the exact implementation.
+
+## Starting out
+
+The most critical aspect of this project was the translation bit. So I've started with that and once I got promising results I carried on with the rest of the tasks.
+
+The [Seamless Communication repository](https://github.com/facebookresearch/seamless_communication) contains multiple models that can perform multiple tasks (e.g. text-to-text, speech-to-text, text-to-speech translations).
+
+I've started by translating a sample audio file (from the book _Mein Wörter-Bilderbuch: Unser Zuhause_) with multiple models (SeamlessM4T-Large v2, SeamlessM4T-Large v1, SeamlessM4T-Medium v1) and into multiple languages (English, Slovak).
+
+At the start I was worried that my laptop GPU wouldn't have enough memory to hold the large models, but with some luck I've managed to run inference on the large ones too after stopping all GUI applications and my desktop environment.
+
+Here are some initial results. I don't think I can share the input audio because of copyright reasons, but hopefully it's fine to post the translated audio.
+
+![#4, English, Medium](audio/4_eng.mp3) ![#4, English, Large](audio/4_eng_large.mp3)
+![#4, Slovak, Medium](audio/4_slk.mp3)
+
+![#6, English, Medium](audio/6_eng.mp3) ![#6, English, Large](audio/6_eng_large.mp3)
+![#6, Slovak, Medium](audio/6_slk.mp3) ![#6, Slovak, Large](audio/6_slk_large.mp3)
+
+After those tests it was clear that I wouldn't translate into Slovak as the quality is pretty bad with both Medium and Large models. English translation with Large model however looked promising and that motivated me to carry on with the investigation. One feature the Large model is missing that it's using the same female voice in all outputs - irrespectively of the input voice, which is varying (male/female, kid/adult etc.).
+
+On the next day I've noticed that there's an SeamlessExpressive model as well, which can be downloaded after filling in a form and agreeing to non-commercial use. So I've tried using that model and I was really surprised how good the results were:
+
+![#4, English, Expressive](audio/4_eng_expressive.mp3) ![#6, English, Expressive](audio/6_eng_expressive.mp3)
+
+Hearing those results was really motivating. The translation was improved (the selection of languages was smaller, so couldn't test Slovak), the input voice "identity" was preserved quite well and so was intonation, pacing, mood of the input. It felt less Google-Translate-y and more like an audio book for kids.
+
+In terms of the technicalities, I've decided to create a Python module `t3`, whose [command line entry point](https://github.com/jtomori/t3/blob/v1.0/t3/__main__.py) would implement the processing workflow and submodules would contain [inference](https://github.com/jtomori/t3/blob/v1.0/t3/s2st.py) and [utilities](https://github.com/jtomori/t3/blob/v1.0/t3/audio_utils.py) functionality. [Tests](https://github.com/jtomori/t3/blob/v1.0/tests.py) would be helpful for ensuring, debugging functionality and I'd run various [code quality checks](https://github.com/jtomori/t3/blob/v1.0/checks.sh) to keep code clean.
+
+## Checking the data
+
+After the initial successful translation tests I've decided to take a closer look at audio files extracted out of the input GME file. The first book I've tried had 685 audio files, so I needed a better understanding of them.
+
+I've listened to the first 100 or so of sounds and split them into multiple categories (hoping that it'd be a representative sample of the whole dataset):
+
+- Pure voice: 82 %
+- Sounds without voice: 12 %
+- Voice with background sounds: 3 %
+- Songs: 3 %
+
+Most of the audio files were 5-10 seconds long, but songs were over a minute, sometimes two.
+
+This categorization has really helped me direct my efforts into areas which would have the greatest impact on this project. I proceeded in a "greedy" fashion - sorting out the majority of files first and then looking into the rest.
+
+Another thing that helped me stay focused was to keep a dev log. I was working on this on evenings and mornings (for ~ 7 days), so that helped me quickly resume where I left my previous work at.
+
+Initially I thought I'd need to separate speech from background sounds (then translating speech and recombining it back afterwards), but after looking at the distribution this wasn't really needed anymore and I was glad I've avoided that rabbit hole.
+
+## Extracting audio files
+
+This was pretty straightforward thanks to the [reverse engineering efforts](https://github.com/entropia/tip-toi-reveng) and tooling around it. Both `tttool` and `libtiptoi` can perform this task.
+
+## Failed translations
+
+When testing translation of various input audio files I've come across some interesting edge cases. Here are my observations:
+
+**Sounds without voice**
+
+Files in the _sounds without voice_ (e.g. sounds of house appliances, animal sounds) category hallucinated translations which had some uncertainty in them, here's what I mean:
+
+![#3, English, Large](audio/3_eng_large.mp3) ![#3, English, Expressive](audio/3_eng_expressive.mp3)
+![#5, English, Large](audio/5_eng_large.mp3) ![#5, English, Expressive](audio/5_eng_expressive.mp3)
+![#8, English, Large](audio/8_eng_large.mp3) ![#8, English, Expressive](audio/8_eng_expressive.mp3)
+![#35, English, Large](audio/35_eng_large.mp3) ![#35, English, Expressive](audio/35_eng_expressive.mp3)
+
+The Large model was producing text along the lines of "I don't know what I'm doing" which is funny given the impossible task of translating non-speech sounds. The Expressive model results sounded more similarly to the inputs, but were still unusable, so it was clear that I had to filter those sounds out before the translation step.
+
+**Songs**
+
+After trying translation of songs with the Expressive model it was clear to me that I need to filter these out as well. **Content warning - that's some nightmarish material.**
+
+![#1, English, Expressive](audio/1_eng_expressive.mp3) ![#2, English, Expressive](audio/2_eng_expressive.mp3)
+
+## Filtering out the too long ones
+
+I've done this for two reasons - to avoid translating songs which didn't really work (see above) and to avoid out of memory errors which were caused by long files. I've arrived at a threshold of 50 seconds (which would filter out only 1 or 3 audio files, depending on the book).
+
+## Filtering out files without speech
+
+The failed translations above made me realize I needed to categorize speech and non-speech audio files, which a quick Google search revealed to be called Voice Activity Detection (VAD). I've come across [Silero VAD](https://github.com/snakers4/silero-vad) which was [really easy to use](https://github.com/jtomori/t3/blob/v1.0/t3/audio_utils.py#L11-L24) and gave me pretty good results.
+
+To get a good understanding of the speech detection accuracy I've leveraged the categorization I've done above and translated it into [parametrized unit tests](https://github.com/jtomori/t3/blob/v1.0/tests.py#L7-L32). Running these tests revealed that the detection was not perfect - it contained both false positives and false negatives. I've tuned the speech detection confidence threshold according to the number of failed tests and arrived at something what I deemed acceptable for the time being.
+
+## Speech-to-speech translation
+
+This was perhaps the most important step. At first I though I'd have to rent a beefier GPU to run the inference, but luckily with GDM disabled I've managed to run both Large and Expressive models. Later I've remembered that my computer has a CPU too and that I can use that to run the inference.
+
+To make inference as quick as possible I stuck with using GPU and I've reworked [Meta's inference script](https://github.com/facebookresearch/seamless_communication/blob/90e2b57ac4d82fa2bfaa25caeffe39ceb8b2ebec/src/seamless_communication/cli/expressivity/predict/predict.py) into [my own one](https://github.com/jtomori/t3/blob/v1.0/t3/s2st.py) which loaded model weights once and then ran inference on multiple inputs. I appreciated Meta's clean code, which made this task pretty straightforward.
+
+This step could be swapped out for another model / service in the future. After this step I output a CSV table with info about duration, category, transcript for checking the data afterwards.
+
+## Assembling a new GME file with the updated audio files
+
+This was the last step of putting all of it together. At the end of the processing pipeline I have the same amount of files as the extracted ones, in the same format, names etc (but part of them has been translated into English). Now I need to produce a usable GME file which can be copied back into TipToi.
+
+The TipToi reverse engineering repository contains a [guide](https://github.com/entropia/tip-toi-reveng/tree/master/Audio) and a tool `libtiptoi` to do just that. This was a great time saver as initially I thought I'd have to do the GME updating on my own. However after some testing I've realized that the tool has a major limitation that it works only with a subset of GME files (only those which have the audio data at the very end of the file) and I had to switch my tests to another book. Well, not a book, but a memory game (_Rekorde im Tierreich_, which contains 371 audio files, 1 is too long, 320 have speech, 51 don't).
+
+This was a bit disappointing as I was hoping I could target any TipToi book/game, but at least I could proceed with my project and demonstrate something working.
+
+In the future work this step could be improved by removing this constraint. I am thinking about replacing OGG files in GME directly with the new ones (which are usually shorter - smaller) and then padding the rest of the bytes with zeros. The `libtiptoi` program has other minor issues like it doesn't support whitespace in paths in filelist and it sets return code to 1 on success.
+
+## Testing
+
+After I had run the full pipeline (processing took around 10 minutes) and successfully created GME file I tried it in TipToi and it has worked pretty well. I noticed some small issues like lowered audio volume of the translated files, but that was easy to fix.
+
+The sound, intonation of the translated audio feels natural, the non-speech sounds are the original ones, so overall it looks (sounds) like usable toy. The translation is not perfect, but in pretty much all cases it can be still understood. The translated audio also feels slightly less clear.
+
+## Future work
+
+Thanks for reading this far. If you have any ideas I'd be happy to hear them.
+
+There are still some things I'd like to improve:
+
+Short term:
+
+- Finish the dockerization step as the whole setup grew quite complicated, so at this point it might be easier to keep it isolated in a container (and to simplify sharing)
+
+Long term (not certain yet):
+
+- Remove the current GME assembly limitation to make this work with any TipToi book/game
+- Improve the VAD step by having an option to manually override detections
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
