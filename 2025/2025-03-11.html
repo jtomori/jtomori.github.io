@@ -75,7 +75,7 @@ After the initial successful translation tests I've decided to take a closer loo
 I've listened to the first 100 or so of sounds and split them into multiple categories (hoping that it'd be a representative sample of the whole dataset):
 
 - Pure voice: 82 %
-- Sounds without voice: 12 %
+- Sounds without voice (non-speech utterances/audio): 12 %
 - Voice with background sounds: 3 %
 - Songs: 3 %
 
@@ -160,5 +160,6 @@ Long term (not certain yet):
 
 - Remove the current GME assembly limitation to make this work with any TipToi book/game
 - Improve the VAD step by having an option to manually override detections
+- Handle "too long" audio files by chunking them into smaller segments (using VAD to avoid splitting files mid-word)
 
 <!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
