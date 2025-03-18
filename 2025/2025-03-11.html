@@ -18,7 +18,7 @@ I think it's not too bad! :) [link to code repository](https://github.com/jtomor
 
 ## Motivation
 
-I like using TipToi when playing with my kids and I had this idea of doing German -> English audio translation in my head for a while. I wasn't sure if the speech-to-speech translation quality would be good enough, but I hoped I'd get something usable (naturally sounding) for my kids.
+I like using TipToi when playing with my kids and I had this idea of doing German -> English audio translation in my head for a while. I wasn't sure if the translation quality would be sufficient, but I hoped for a natural-sounding result that my kids could enjoy.
 
 I haven't done personal projects for a while, so I thought now it's a good time to spend some time on it. I've done similar work (although in another domain) at my job for the past few years, so it's nice to do something as an open source project. I have little experience with audio and applying state of the art machine learning models to it, so that looked like a good excuse to change that.
 
@@ -26,7 +26,7 @@ I haven't done personal projects for a while, so I thought now it's a good time 
 
 I think the demo video above demonstrates nicely how TipToi works. TipToi uses [optical identification](https://github.com/entropia/tip-toi-reveng/wiki/PEN-Optical-ID-and-codes) for identifying which sounds to play when it touches the surface. Overall it's a nice and well made toy to have around.
 
-While TipToi's content is stored in it's own proprietary format, there's an awesome [open source community](https://github.com/entropia/tip-toi-reveng) which has reverse engineered large portion of it. This is a very cool effort which has enabled this project and many others. Another project I did in the past was to print out my own books with songs, stories my kids like.
+While TipToi's content is stored in its own proprietary format, there's an awesome [open source community](https://github.com/entropia/tip-toi-reveng) which has reverse engineered large portion of it. This is a very cool effort which has enabled this project and many others. Another project I did in the past was to print out my own books with songs, stories my kids like.
 
 I quite like how TipToi works - to get an audio content for a book you own you just download a respective GME file from [their website](https://service.ravensburger.de/tiptoi%C2%AE/tiptoi%C2%AE_Audiodateien) and copy it over USB to the pen. I like that they don't require any registration, subscription or a silly app to manage the pen. The pen will keep working until it breaks and you can download GME files for new books as long as Ravensburger hosts them.
 
@@ -58,7 +58,7 @@ Here are some initial results. I don't think I can share the input audio because
 ![#6, English, Medium](audio/6_eng.mp3) ![#6, English, Large](audio/6_eng_large.mp3)
 ![#6, Slovak, Medium](audio/6_slk.mp3) ![#6, Slovak, Large](audio/6_slk_large.mp3)
 
-After those tests it was clear that I wouldn't translate into Slovak as the quality is pretty bad with both Medium and Large models. English translation with Large model however looked promising and that motivated me to carry on with the investigation. One feature the Large model is missing that it's using the same female voice in all outputs - irrespectively of the input voice, which is varying (male/female, kid/adult etc.).
+After testing, it became clear that translating into Slovak was not viable since both the Medium and Large models produced subpar quality. English translation with Large model however looked promising and that motivated me to carry on with the investigation. One feature the Large model is missing that it's using the same female voice in all outputs - irrespectively of the input voice, which is varying (male/female, kid/adult etc.).
 
 On the next day I've noticed that there's an SeamlessExpressive model as well, which can be downloaded after filling in a form and agreeing to non-commercial use. So I've tried using that model and I was really surprised how good the results were:
 
