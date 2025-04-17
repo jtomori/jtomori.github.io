@@ -16,6 +16,10 @@ In short, a _volumetric video_ or _free viewpoint video_ (sometimes called volca
 
 You can check this [example volumetric video](https://view.dimensionstudio.co/) in your browser.
 
+![A typical volumetric video stage, [source](https://hhoppe.com/fvv_supplemental.pdf)](images/fvv.jpg)
+
+![Example of a volumetric video asset, [source](https://hhoppe.com/proj/fvv/)](images/fvv.gif)
+
 ## Is it any good?
 
 It can be. Volumetric video can be realistic enough to be used in [Hollywood](https://fmx.de/en/program-2023/detail/event/26744) [productions](https://dimensionstudio.co/work/universal-s-wicked/) or light enough to be used in [mobile AR experiences](https://dimensionstudio.co/work/burger-king-tinie-tempah-on-a-whopper/).
@@ -38,6 +42,8 @@ In short, synthetic data is artificially generated training data that can comple
 
 If you are already familiar with the pros and cons of synthetic data then you can skip this section and continue with the [Volumetric video for synthetic data](#volumetricvideoforsyntheticdata) section.
 
+![Synthetic data example, [source](https://techcrunch.com/2022/11/16/parallel-domain-says-autonomous-driving-wont-scale-without-synthetic-data/)](images/synth_data.jpg)
+
 ## Is it any good?
 
 It can be. Synthetic data has benefited a wide variety of research problems from [autonomous driving](#whatisasyntheticdataanyway/interestingcasestudies/alvinn:anautonomouslandvehicleinaneuralnetwork) to [facial landmark detection](#whatisasyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone). With enough care it can be as good as a real data and in some cases it has properties missing in the human labelled real data - more on that below.
@@ -47,6 +53,8 @@ It can be. Synthetic data has benefited a wide variety of research problems from
 Here are a few takeaways from some interesting research papers I came across
 
 ### ALVINN: An Autonomous Land Vehicle In A Neural Network
+
+![](images/alvinn.jpg)
 
 _Dean A. Pomerleau, 1988_, [pdf](https://proceedings.neurips.cc/paper/1988/file/812b4ba287f5ee0bc9d43bbf5bbe87fb-Paper.pdf)
 
@@ -62,6 +70,9 @@ Describes a neural network (NN) architecture for predicting steering direction b
 To sum it up, the researcher has found that synthetic data was: good enough for training an NN which performed well when presented with real data, it was easier, more flexible, and faster to generate synthetic data than to capture real data, it has resulted in a comparable performance to traditional autonomous driving approaches and has realized that the quality of training data is crucial to the performance of the NN.
 
 ### Fake It Till You Make It: Face analysis in the wild using synthetic data alone
+
+![](images/fakeit.jpg)
+
 _Erroll Wood, Tadas Baltrušaitis, Charlie Hewitt, Sebastian Dziadzio, Matthew Johnson, Virginia Estellers, Thomas J. Cashman, Jamie Shotton, 2021_, [project page](https://microsoft.github.io/FaceSynthetics/)
 
 This is a significant attempt at settling the synthetic vs real data debate ;)
@@ -124,13 +135,17 @@ Volumetric video assets have a couple of compelling properties that can be handy
 - Cost efficiency - even though volcap shoots are not cheap, the overall cost can be reduced by the fact that during a single shooting day, it is possible to capture many actors
   - Thanks to [existing](https://secure.axyz-design.com/) [libraries](https://renderpeople.com/3d-people/?_product=4d-people) of volcap assets this upfront cost can be skipped altogether and assets can be purchased cheaply for testing
 
+![Volumetric video with annotations, [source](https://www.fxguide.com/fxfeatured/arcturus-volumetric-video-editing/)](images/segmented.jpg)
+
+![Volumetrically captured pedestrians, [source](https://www.chaos.com/anima)](images/anima.jpg)
+
 ## Why not avatars
 
 How do avatars compare to volumetric video? By avatars I mean 3D humans which were created with the traditional VFX / games pipeline. That pipeline involves numerous steps like design, modeling, texturing, shading, rigging, animating, character effects, and so on. In a nutshell for the same cost you can get more realistic and more volcap assets than avatar assets. Because of the realism issues associated with avatars, avatar assets are more likely to contribute to the domain gap than volcap assets.
 
 While avatars result in a similar output to that of volcap, they are slower and more expensive to produce and generally look less realistic in terms of both appearance and motion. Their advantage of having complete control of appearance, and motion is also their curse since that requires human experts to manually craft them. Production of avatars is less scalable than volcap, probably on the orders of a magnitude and that gap increases even more when you are after photorealistic avatars and you run into the uncanny valley.
 
-I have compared avatars and volcap on the [CVMP 2021 Industry Special Session](https://youtu.be/Nyo9Cez_Re8?t=56), so feel free to watch that to find out more.
+I have compared avatars and volcap on the [CVMP 2021 Industry Special Session](https://youtu.be/Nyo9Cez_Re8?t=56) - feel free to watch that to find out more.
 
 Tools like [MetaHumans](https://www.unrealengine.com/en-US/metahuman), [Character Creator](https://www.reallusion.com/character-creator/) and various image-to-image ML approaches definitely help with the realism and production efficiency of avatars, but they are still lacking behind photographed volcap assets in terms of realism.
 
