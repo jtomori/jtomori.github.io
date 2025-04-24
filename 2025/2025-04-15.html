@@ -4,17 +4,17 @@
 **Volumetric video for synthetic training data**
 [ <- ](..) _2025-04-15_
 
-In this post, I propose an approach I haven’t seen before - enhancing synthetic data for human-centric computer vision machine learning (ML) models with volumetric video (volcap).
+In this post, I propose an approach I haven't seen used before - enhancing the realism of synthetic data for human-centric computer vision machine learning models with volumetric video.
 
-I think that volcap has benefits of both the real world (realism) and synthetic data (flexibility, scalability) and I will explain what I mean by that below.
+I believe that volumetric video has benefits of both the real world (photorealism) and synthetic data (flexibility, scalability) and I will explain what I mean by that below.
 
 # What is a volumetric video anyway
 
-In short, a _volumetric video_ or _free viewpoint video_ (sometimes called volcap) is a video you can freely look around. For example, you can rotate your view around a scene with actors and see their actions from any side. This shouldn't be confused with a 360 (3 DOF) video where you can look around from a fixed position - in the case of volcap you can freely move through the virtual scene.
+In short, a _volumetric video_ or _free viewpoint video_ (sometimes called volcap) is a video you can freely look around. For example, you can rotate your view around a scene with actors and see their actions from any side. This shouldn't be confused with a 360 (3 DOF, or degrees of freedom) video where you can look around from a fixed position - in the case of volcap you can freely move through the virtual scene (6 DOF).
 
 [I could talk about volcap for hours](https://jtomori.github.io/fvv_workshop_2021_aka_public/), but I will do my best to keep it short here :).
 
-You can check this [example volumetric video](https://view.dimensionstudio.co/) in your browser.
+You can check this [example volumetric video](https://view.dimensionstudio.co/) in your web browser.
 
 ![A typical volumetric video stage, [source](https://hhoppe.com/fvv_supplemental.pdf)](images/fvv.jpg)
 
@@ -24,19 +24,22 @@ You can check this [example volumetric video](https://view.dimensionstudio.co/) 
 
 It can be. Volumetric video can be realistic enough to be used in [Hollywood](https://fmx.de/en/program-2023/detail/event/26744) [productions](https://dimensionstudio.co/work/universal-s-wicked/) or light enough to be used in [mobile AR experiences](https://dimensionstudio.co/work/burger-king-tinie-tempah-on-a-whopper/).
 
-Volcap advantages include realism, flexibility, and scalability which will come in handy when I will discuss some of the challenges associated with real world training data below.
+Volcap advantages include photorealism, flexibility, and scalability which will come in handy when I will discuss some of the challenges associated with real world and synthetic training data below.
 
 ## Challenges of volumetric video
 
 Volcap definitely has some challenges, but it is usually possible to work around them:
 
-- Baked‑in motion: you can’t fully alter recorded movements, though minor reposing is sometimes feasible
-- Capturing fine details (like loose hair) can fail if camera resolution is insufficient - this of course depends on the capture stage properties
-- High costs for capture and reconstruction, though per‑asset cost drops when shooting at scale
+- Baked‑in motion: you can't fully alter recorded movements, though minor reposing is feasible
+- Limited resolution: capturing fine details (like loose hair) can fail if camera resolution is insufficient - this of course depends on the capture stage properties
+- Relightability: the process of realistically relighting captured assets is non-trivial, requiring either a specialized lighting setup, or an extra post-processing step
+- Cost: capture and reconstruction is not cheap, though per‑asset cost drops when shooting at scale
+
+The [What's next for volumetric video](#what'snextforvolumetricvideo) section below shows how the academia and industry are tackling those challenges.
 
 # What is synthetic data anyway
 
-One of the hurdles in applying up-to-date machine learning approaches for complex scientific tasks is the scarcity of labeled data, a gap effectively bridged by the use of synthetic data, which closely replicates real experimental data.
+One of the hurdles in applying up-to-date machine learning (ML) approaches for complex scientific tasks is the scarcity of labeled data, a gap effectively bridged by the use of synthetic data, which closely replicates real experimental data.
 
 In short, synthetic data is artificially generated training data that can complement - or even replace - real‑world data. Synthetic data can be useful in cases where real data is dangerous, expensive, slow, or impossible to capture.
 
@@ -46,11 +49,11 @@ If you are already familiar with the pros and cons of synthetic data then you ca
 
 ## Is it any good?
 
-It can be. Synthetic data has benefited a wide variety of research problems from [autonomous driving](#whatisasyntheticdataanyway/interestingcasestudies/alvinn:anautonomouslandvehicleinaneuralnetwork) to [facial landmark detection](#whatisasyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone). With enough care it can be as good as a real data and in some cases it has properties missing in the human labelled real data - more on that below.
+It can be. Synthetic data has benefited a wide variety of research problems from [autonomous driving](#whatissyntheticdataanyway/interestingcasestudies/alvinn:anautonomouslandvehicleinaneuralnetwork) to [facial landmark detection](#whatissyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone). With enough care it can be as good as a real data and in some cases it has properties missing in the human labelled real data - more on that below.
 
 ## Interesting case studies
 
-Here are a few takeaways from some interesting research papers I came across
+Here are a few takeaways from some influential research in this domain
 
 ### ALVINN: An Autonomous Land Vehicle In A Neural Network
 
@@ -84,7 +87,9 @@ This is a significant attempt at settling the synthetic vs real data debate ;)
 - _We have shown that it is possible to achieve results comparable with the state of the art for two well-trodden tasks: face parsing and landmark localization, without using a single real image during training._
 - _Assuming $1 per hour for an M60 GPU (average price across cloud providers), it would cost $7,200 to render 100,000 images. Though this seems expensive, real data collection costs can run much higher, especially if we take annotation into consideration._
 
-This relatively recent research shows that: synthetic data alone can be as good as the real data, it is cheaper to generate, it can contain annotations that would be impossible to label by hand, and shows the flexibility of the dataset, e.g. repurposing it for a VR eye tracking application.
+This relatively recent research shows that: highly realistic synthetic data alone can be as good as the real data, it is cheaper to generate, it can contain annotations that would be impossible to label by hand, and shows the flexibility of the dataset, e.g. repurposing it for a VR eye tracking application.
+
+An interesting observation is that the increased realism of synthetic data has removed the necessity of domain gap reducing strategies like data mixing or domain adaptation. Similarly, the increased realism of synthetic humans is the main benefit that volcap can bring to the synthetic data in my opinion.
 
 ## Advantages of synthetic data
 
@@ -95,7 +100,7 @@ Based on the above case studies we can conclude that for some research problems 
   - E.g. if the sensor configuration changes it is not needed to re-capture all of the real data, the synthetic data just needs to be rerendered with the new parameters
 - Can produce consistent labels that would be impossible to annotate manually
 - Can bridge the gap between rare and common-class data by upsampling rare classes in a simulation
-  - E.g. we could add cyclists to our synthetic data if they were underrepresented in the real data
+  - E.g. we could add cyclists to our autonomous vehicles synthetic data if they were underrepresented in the real data
 
 Some additional advantages are regarding the safety of capturing edge cases. In the context of autonomous vehicles synthetic data would allow us to create a wide range of driving scenarios, including complex, rare, and dangerous situations, without the risks associated with real-world testing like jaywalkers, kids unexpectedly running across a busy street, people on construction sites, around broken vehicles, drivers falling asleep and so on.
 
@@ -103,12 +108,14 @@ To be clear, I'm not trying to claim here that synthetic data is a magic solutio
 
 ## Challenges of synthetic data
 
-Training with synthetic data, however, does add one new hurdle: because synthetic data often differs from real world data in subtle ways, a domain gap exists between them. Those subtle differences can negatively influence the accuracy of the ML model when presented with real data. Figuring out those differences can be non-trivial, especially for non-visible light data like X-ray scans and so on (see [this talk](https://youtu.be/dBSxKyJxtzE?t=2320) for a good example).
+Training with synthetic data, however, does add one new hurdle: because synthetic data often differs from real world data in subtle ways, a domain gap exists between them. Those subtle differences can negatively influence the accuracy of the ML model when presented with the real data. This is especially true for synthetic humans, which are notoriously hard to get right.
 
 There are multiple approaches for minimizing the domain gap, e.g.
 
 - Making the synthetic data more similar to the real data (see this [blog post](https://paralleldomain.com/not-all-synthetic-datasets-are-created-equal) for an example)
 - Training on a mix of synthetic and real data and then fine-tuning on real data only (see this [blog post](https://www.appliedintuition.com/blog/using-synthetic-data-effectively-at-scale) for an example)
+
+In the following section I explain how I believe volcap can reduce the domain gap in realism between the synthetic and real humans. My reasoning is similar to the observation from the [Fake It Till You Make It](#whatissyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone) paper: increasing realism of synthetic data removes the need for other domain bridging strategies.
 
 # Volumetric video for synthetic data
 
@@ -147,13 +154,13 @@ While avatars result in a similar output to that of volcap, they are slower and 
 
 I have compared avatars and volcap on the [CVMP 2021 Industry Special Session](https://youtu.be/Nyo9Cez_Re8?t=56) - feel free to watch that to find out more.
 
-Tools like [MetaHumans](https://www.unrealengine.com/en-US/metahuman), [Character Creator](https://www.reallusion.com/character-creator/) and various image-to-image ML approaches definitely help with the realism and production efficiency of avatars, but they are still lacking behind photographed volcap assets in terms of realism.
+Tools like [MetaHumans](https://www.unrealengine.com/en-US/metahuman), [Character Creator](https://www.reallusion.com/character-creator/) and various image-to-image ML approaches definitely help with the realism and production efficiency of avatars, but they are still lagging behind photographed volcap assets in terms of realism.
 
 # What's next for volumetric video
 
-Volumetric video is an actively researched area with both commercial and academic contributions.
+Volumetric video is an actively researched area with advancements from both academia and industry.
 
-Recent advances in representation help resolve some of the limitations [discussed above](#whatisavolumetricvideoanyway/challengesofvolumetricvideo). Here are some examples of recent research and commercial applications:
+Recent advances address some of the limitations [discussed above](#whatisavolumetricvideoanyway/challengesofvolumetricvideo), like relightability, or drivable motion. Here are some examples of recent research and commercial applications:
 
 - [The Relightables: Volumetric Performance Capture of Humans with Realistic Relighting](https://augmentedperception.github.io/therelightables/), 2019
   - Shows how to leverage light stages to capture and infer material properties which help with relighting of volumetric video
@@ -161,6 +168,8 @@ Recent advances in representation help resolve some of the limitations [discusse
   - Introduces a dynamic neural scene representation for volumetric video which supports long sequences and resolves fine details, it also includes a very high-quality dataset of volumetric captures
 - [DifFRelight: Diffusion-Based Facial Performance Relighting](https://www.eyelinestudios.com/research/diffrelight.html), 2024
   - Combines Gaussian splats and one-light-at-a-time data captured at a light stage for diffusion-based image-to-image relighting of faces in a volumetric video
+- [GaussianHeads: End-to-End Learning of Drivable Gaussian Head Avatars from Coarse-to-fine Representations](https://vcai.mpi-inf.mpg.de/projects/GaussianHeads/), 2024
+  - Generates highly dynamic and deformable, drivable human faces in real time with the help of Gaussian splats
 - [Infinite-Realities's Spatial Capture](https://www.ir-ltd.net/ir/4dgs/)
   - Utilizes Gaussian splats for a high-quality reconstruction in a commercial setting
 
@@ -168,6 +177,6 @@ Currently a lot of research is spent on radiance fields, Gaussian splats represe
 
 # Recap
 
-I have proposed how volumetric video could improve synthetic training data, especially in applications involving humans. Volumetric video in synthetic data has the potential to solve challenges associated with privacy, safety, cost, and time.
+I have proposed how volumetric video could reduce the domain gap of synthetic training data involving humans by increasing their realism.
 
 <!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
