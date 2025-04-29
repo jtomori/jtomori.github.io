@@ -8,6 +8,31 @@ In this post, I propose an approach I haven't seen used before - enhancing the r
 
 I believe that volumetric video has benefits of both the real world (photorealism) and synthetic data (flexibility, scalability) and I will explain what I mean by that below.
 
+# TL;DR
+
+Which images of humans below do you find realistic and which not?
+
+![Image 1, [source](https://microsoft.github.io/FaceSynthetics/)](images/intro_fakeit.jpg) ![Image 2, [source](https://github.com/SelfishGene/SFHQ-T2I-dataset)](images/intro_sfhq.jpg) ![Image 3, [source](https://actors-hq.com/)](images/intro_actorshq.jpg)
+
+I think that to many the second and third images look real, while there's something off about the first one[^fakeit].
+
+None of these are a photograph, in fact, the first one is a _3D avatar_, the second one was generated with a _"text to image"_ machine learning model and the third one is from a _volumetric video_.
+
+The gist of this post is that when it comes to realism of synthetic training data, volumetric video is superior to 3D avatars. While the text to image generated image looks real, it is not useful in 3D use cases.
+
+Each of those types have different properties in terms of their realism and flexibility of their use:
+
+ Type | Realistic | Flexible
+------|:---------:|:--------:
+ 3D avatar | ❌ | ✅
+ Text to image | ✅ | ❌
+ Volumetric video | ✅ | ✅
+  [Comparison of various types of digital humans]
+
+In the rest of this post I will dive into volumetric video, synthetic datasets and their combination.
+
+[^fakeit]: _To be fair - it's still quite good given it's a 3D avatar, but it looks uncanny when compared to the other two and I had to browse through many images in that [dataset](https://www.kaggle.com/datasets/jadesag3/ms-synthetic-face) to find a good one, here are some fun ones: [1](images/000004.jpg), [2](images/000005.jpg), [3](images/000015.jpg)_
+
 # What is a volumetric video anyway
 
 In short, a _volumetric video_ or _free viewpoint video_ (sometimes called volcap) is a video you can freely look around. For example, you can rotate your view around a scene with actors and see their actions from any side. This shouldn't be confused with a 360 (3 DOF, or degrees of freedom) video where you can look around from a fixed position - in the case of volcap you can freely move through the virtual scene (6 DOF).
@@ -130,7 +155,7 @@ Volumetric video assets have a couple of compelling properties that can be handy
 - Volcap assets are 3D assets in motion, so are compatible with game engines or Visual Effects (VFX) workflows, they can complement existing synthetic environments
   - Because of being 3D they are very flexible - they can be viewed from any angle, can be converted to LIDAR samples, and depth maps, used for collisions in simulations
   - They can be further modified - added props, clothing, changed colours of clothing, and skin tone which provides a lot of flexibility once the asset is captured
-    - This is analogous to the approach taken by [Fake It Till You Make It](#whatisasyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone) which has captured scans of 500 real humans and augmented them to 100,000 synthetic assets
+    - This is analogous to the approach taken by [Fake It Till You Make It](#whatissyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone) which has captured scans of 500 real humans and augmented them to 100,000 synthetic assets
   - See [this presentation](https://youtu.be/ITbxJeCoaQY) for examples of adding variation to existing assets, including with some generative AI tools
   - Individual volcap assets can be combined to form large crowds, pedestrians
 - Volcap is photorealistic - doesn't suffer from the "uncanny valley" issues that are associated with hand-crafted 3D avatars (more on that [below](#volumetricvideoforsyntheticdata/whynotavatars))
@@ -177,6 +202,43 @@ Currently a lot of research is spent on radiance fields, Gaussian splats represe
 
 # Recap
 
-I have proposed how volumetric video could reduce the domain gap of synthetic training data involving humans by increasing their realism.
+In this post I've introduced volumetric video, synthetic training data and mentioned some of their advantages and limitations. Then I've compared synthetic data to real world data and proposed how volumetric video could reduce the domain gap of humans in the synthetic data by improving their realism.
+
+# Bonus section - various synthetic human datasets
+
+While working on this post I came across a few datasets, sharing some of them below:
+
+- 3D
+  - Volumetric
+    - [ActorsHQ, 2023](https://actors-hq.com/)
+    - [THUman4.0 Dataset, 2022](https://github.com/ZhengZerong/THUman4.0-Dataset)
+    - [BEHAVE, 2022](https://opensynthetics.com/dataset/behave-dataset/)
+    - [THUman2.1, 2021](https://github.com/ytrock/THuman2.0-Dataset)
+    - [LightStage, 2021](https://chingswy.github.io/Dataset-Demo/)
+    - [MultiHuman, 2021](https://github.com/y-zheng18/MultiHuman-Dataset/)
+  - Avatars
+    - [Fake It Till You Make It, 2021](https://www.kaggle.com/datasets/jadesag3/ms-synthetic-face)
+    - [MetaHuman, 2021](https://www.kaggle.com/allexmendes/datasets)
+    - [MOTSynth (GTA V), 2021](https://aimagelab.ing.unimore.it/imagelab/page.asp?IdPage=42)
+    - [RandPerson, 2020](https://github.com/VideoObjectSearch/RandPerson)
+    - [IDDA, 2020](https://idda-dataset.github.io/home/)
+    - [SYNSCAPES, 2018](https://synscapes.on.liu.se/index.html)
+    - [VIVID, 2018](https://github.com/kuanting/vivid)
+    - [SURREAL, 2017](https://www.di.ens.fr/willow/research/surreal/data/)
+    - [PHAV, 2017](http://adas.cvc.uab.es/phav/)
+    - [Playing for Benchmarks (GTA V), 2017](https://opensynthetics.com/dataset/playing-for-benchmarks/)
+    - [SOMASet, 2017](https://www.kaggle.com/datasets/vicolab/somaset)
+    - [Human3.6M, 2014](http://vision.imar.ro/human3.6m/description.php)
+  - Commercial
+    - [Synthesis.ai's Diverse Human Faces Dataset](https://opensynthetics.com/dataset/diverse-human-faces-dataset/)
+    - [Synthesis.ai's Static Human Gestures/Poses Dataset](https://opensynthetics.com/dataset/static-human-poses-dataset-by-synthesis-ai/)
+    - [Synthesis.ai's Animated Human Gestures/Poses Dataset](https://opensynthetics.com/dataset/animated-humans-dataset-by-synthesis-ai/)
+    - [Anyverse's InCabin, ADAS & AD Datasets](https://anyverse.ai/)
+    - [Renderpeople's 4D People](https://renderpeople.com/3d-people/?_product=4d-people)
+    - [AXYZ's 4D People](https://secure.axyz-design.com/)
+- 2D
+  - [Synthetic Faces High Quality - Text2Image, 2024](https://github.com/SelfishGene/SFHQ-T2I-dataset)
+
+[Synthetic Datasets for Autonomous Driving: A Survey](https://arxiv.org/pdf/2304.12205) is a good, recent overview of various autonomous driving datasets.
 
 <!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
