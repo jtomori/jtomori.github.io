@@ -4,23 +4,23 @@
 **Volumetric video for synthetic training data**
 [ <- ](..) _2025-04-15_
 
-In this post, I propose an approach I haven't seen used before - enhancing the realism of synthetic data for human-centric computer vision machine learning models with volumetric video.
+In this post, I propose an approach I haven't seen before: enhancing the realism of synthetic data for human‑centric computer vision models using volumetric video.
 
-I believe that volumetric video has benefits of both the real world (photorealism) and synthetic data (flexibility, scalability) and I will explain what I mean by that below.
+I believe volumetric video combines the benefits of the real world (photorealism) with those of synthetic data (flexibility and scalability). I'll explain what I mean below.
 
 # TL;DR
 
-Which images of humans below do you find realistic and which not?
+Which of the images below do you find realistic, and which do you not?
 
 ![Image 1, [source](https://microsoft.github.io/FaceSynthetics/)](images/intro_fakeit.jpg) ![Image 2, [source](https://github.com/SelfishGene/SFHQ-T2I-dataset)](images/intro_sfhq.jpg) ![Image 3, [source](https://actors-hq.com/)](images/intro_actorshq.jpg)
 
-I think that to many the second and third images look real, while there's something off about the first one[^fakeit].
+To many, the second and third images look real, while the first seems off[^fakeit].
 
-None of these are a photograph, in fact, the first one is a _3D avatar_, the second one was generated with a _"text to image"_ machine learning model and the third one is from a _volumetric video_.
+None of these are photographs. In fact, the first is a _3D avatar_, the second was generated with a _"text to image"_ model, and the third comes from a _volumetric video_.
 
-The gist of this post is that when it comes to realism of synthetic training data, volumetric video is superior to 3D avatars. While the text to image generated image looks real, it is not useful in 3D use cases.
+The gist of this post is that when it comes to the realism of synthetic training data, volumetric video is superior to 3D avatars. Although the text to image result looks real, it isn't very useful for 3D use cases.
 
-Each of those types have different properties in terms of their realism and flexibility of their use:
+Each of these types has different properties in terms of realism and flexibility:
 
  Type | Realistic | Flexible
 ------|:---------:|:--------:
@@ -29,7 +29,7 @@ Each of those types have different properties in terms of their realism and flex
  Volumetric video | ✅ | ✅
   [Comparison of various types of digital humans]
 
-In the rest of this post I will dive into volumetric video, synthetic datasets and their combination.
+In the rest of this post, I will dive into volumetric video, synthetic training data and their combination.
 
 [^fakeit]: _To be fair - it's still quite good given it's a 3D avatar, but it looks uncanny when compared to the other two and I had to browse through many images in that [dataset](https://www.kaggle.com/datasets/jadesag3/ms-synthetic-face) to find a good one, here are some fun ones: [1](images/000004.jpg), [2](images/000005.jpg), [3](images/000015.jpg)_
 
@@ -57,10 +57,10 @@ Volcap definitely has some challenges, but it is usually possible to work around
 
 - Baked‑in motion: you can't fully alter recorded movements, though minor reposing is feasible
 - Limited resolution: capturing fine details (like loose hair) can fail if camera resolution is insufficient - this of course depends on the capture stage properties
-- Relightability: the process of realistically relighting captured assets is non-trivial, requiring either a specialized lighting setup, or an extra post-processing step
+- Relightability: the process of realistically relighting captured assets is non-trivial, requiring either a specialized lighting setup or an extra post-processing step
 - Cost: capture and reconstruction is not cheap, though per‑asset cost drops when shooting at scale
 
-The [What's next for volumetric video](#what'snextforvolumetricvideo) section below shows how the academia and industry are tackling those challenges.
+The [What's next for volumetric video](#what'snextforvolumetricvideo) section below shows how academia and industry are tackling those challenges.
 
 # What is synthetic data anyway
 
@@ -74,7 +74,7 @@ If you are already familiar with the pros and cons of synthetic data then you ca
 
 ## Is it any good?
 
-It can be. Synthetic data has benefited a wide variety of research problems from [autonomous driving](#whatissyntheticdataanyway/interestingcasestudies/alvinn:anautonomouslandvehicleinaneuralnetwork) to [facial landmark detection](#whatissyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone). With enough care it can be as good as a real data and in some cases it has properties missing in the human labelled real data - more on that below.
+It can be. Synthetic data has benefited a wide variety of research problems from [autonomous driving](#whatissyntheticdataanyway/interestingcasestudies/alvinn:anautonomouslandvehicleinaneuralnetwork) to [facial landmark detection](#whatissyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone). With enough care it can be as good as a real data and in some cases, it has properties missing in the human labelled real data - more on that below.
 
 ## Interesting case studies
 
@@ -90,12 +90,14 @@ Describes a neural network (NN) architecture for predicting steering direction b
 
 - _Training has been conducted using simulated road images. Successful tests on the Carnegie Mellon autonomous navigation test vehicle indicate that the network can effectively follow real roads under certain field conditions._
 - _Training on actual road images is logistically difficult, because in order to develop a general representation, the network must be presented with a large number of training exemplars depicting roads under a wide variety of conditions. Collection of such a data set would be difficult, and changes in parameters such as camera orientation would require collecting an entirely new set of road images. To avoid these difficulties we have developed a simulated road generator which creates road images to be used as training exemplars for the network._
-- _At the relatively low resolution being used it is difficult to distinguish between real and simulated roads._ (I find this observation hilarious)
+- _At the relatively low resolution being used it is difficult to distinguish between real and simulated roads._[^alvinn]
 - _Training involves first creating a set of 1200 road snapshots depicting roads with a wide variety of retinal orientations and positions, under a variety of lighting conditions and with realistic noise levels._
 - _Performance of the network to date is comparable to that achieved by the best traditional vision-based autonomous navigation algorithm at CMU under the limited conditions tested._
 - _Namely, in this paradigm the data, not the programmer, determines the salient image features crucial to accurate road navigation. From a practical standpoint, this data responsiveness has dramatically sped ALVINN's development. Once a realistic artificial road generator was developed, backpropagation produced in half an hour a relatively successful road following system. It took many months of algorithm development and parameter tuning by the vision and autonomous navigation groups at CMU to reach a similar level of performance using traditional image processing and pattern recognition techniques._
 
 To sum it up, the researcher has found that synthetic data was: good enough for training an NN which performed well when presented with real data, it was easier, more flexible, and faster to generate synthetic data than to capture real data, it has resulted in a comparable performance to traditional autonomous driving approaches and has realized that the quality of training data is crucial to the performance of the NN.
+
+[^alvinn]: I find this observation hilarious
 
 ### Fake It Till You Make It: Face analysis in the wild using synthetic data alone
 
@@ -129,18 +131,18 @@ Based on the above case studies we can conclude that for some research problems 
 
 Some additional advantages are regarding the safety of capturing edge cases. In the context of autonomous vehicles synthetic data would allow us to create a wide range of driving scenarios, including complex, rare, and dangerous situations, without the risks associated with real-world testing like jaywalkers, kids unexpectedly running across a busy street, people on construction sites, around broken vehicles, drivers falling asleep and so on.
 
-To be clear, I'm not trying to claim here that synthetic data is a magic solution to all of your research problems. This is definitely not a comprehensive literature review and definitely suffers from the survivorship bias. But I hope that it gets across the point of viability, or even preferability of synthetic data for some use cases.
+To be clear, I'm not trying to claim here that synthetic data is a magic solution to all of your research problems. This is not a comprehensive literature review and definitely suffers from the survivorship bias. But I hope that it gets across the point of viability, or even preferability of synthetic data for some use cases.
 
 ## Challenges of synthetic data
 
-Training with synthetic data, however, does add one new hurdle: because synthetic data often differs from real world data in subtle ways, a domain gap exists between them. Those subtle differences can negatively influence the accuracy of the ML model when presented with the real data. This is especially true for synthetic humans, which are notoriously hard to get right.
+Training with synthetic data, however, does add one new hurdle: because synthetic data often differs from real world data in subtle ways, a domain gap exists between them. Those subtle differences can negatively influence the accuracy of the ML model when presented with real data. This is especially true for synthetic humans, which are notoriously hard to get right.
 
 There are multiple approaches for minimizing the domain gap, e.g.
 
 - Making the synthetic data more similar to the real data (see this [blog post](https://paralleldomain.com/not-all-synthetic-datasets-are-created-equal) for an example)
 - Training on a mix of synthetic and real data and then fine-tuning on real data only (see this [blog post](https://www.appliedintuition.com/blog/using-synthetic-data-effectively-at-scale) for an example)
 
-In the following section I explain how I believe volcap can reduce the domain gap in realism between the synthetic and real humans. My reasoning is similar to the observation from the [Fake It Till You Make It](#whatissyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone) paper: increasing realism of synthetic data removes the need for other domain bridging strategies.
+In the following section, I explain how I believe volcap can reduce the domain gap in realism between synthetic and real humans. My reasoning is similar to the observation from the [Fake It Till You Make It](#whatissyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone) paper: increasing realism of synthetic data removes the need for other domain bridging strategies.
 
 # Volumetric video for synthetic data
 
@@ -150,9 +152,11 @@ Detecting humans is central to many computer vision applications. However workin
 
 Synthetic data has advantages in those regards, but hand-crafting synthetic humans is notoriously difficult. It is definitely possible, but not cheap, and requires very specialized expertise. Here comes volumetric video, which are photorealistic 3D captures of humans in motion.
 
+Volumetric video has the good parts of both real and synthetic data: the benefits associated with synthetic data - flexibility and scalability. But when it comes to realism, it's closer to the real data than synthetic data.
+
 Volumetric video assets have a couple of compelling properties that can be handy for synthetic data:
 
-- Volcap assets are 3D assets in motion, so are compatible with game engines or Visual Effects (VFX) workflows, they can complement existing synthetic environments
+- Volcap assets are 3D assets in motion, so are compatible with game engines or Visual Effects (VFX) workflows, they are compatible with existing synthetic environments
   - Because of being 3D they are very flexible - they can be viewed from any angle, can be converted to LIDAR samples, and depth maps, used for collisions in simulations
   - They can be further modified - added props, clothing, changed colours of clothing, and skin tone which provides a lot of flexibility once the asset is captured
     - This is analogous to the approach taken by [Fake It Till You Make It](#whatissyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone) which has captured scans of 500 real humans and augmented them to 100,000 synthetic assets
@@ -161,8 +165,9 @@ Volumetric video assets have a couple of compelling properties that can be handy
 - Volcap is photorealistic - doesn't suffer from the "uncanny valley" issues that are associated with hand-crafted 3D avatars (more on that [below](#volumetricvideoforsyntheticdata/whynotavatars))
   - Since volcap is captured with cameras it is as real as a photograph can be - realism isn't being added by artists, but is inherent in the capture process
   - This can help with reducing the domain gap of synthetic data, especially when involving virtual humans
+  - I think this is the key benefit of using volcap in synthetic data
 - Volcap is scalable - [you can capture hundreds of actors](https://fmx.de/en/program-2023/detail/event/26744) over a few days resulting in thousands of assets with varying actions, appearances
-- Volcap is flexible - you can capture almost anything that fits into the capture stage, including animals, complex costumes, [fast motion](https://dimensionstudio.co/work/sky-sports-golf-open-2021/), and so on. If the size is a limitation, [you can use a treadmill](https://dimensionstudio.co/work/pretty-green-x-three-adwoa-aboah-lfw/)
+- Volcap is flexible - you can capture almost anything that fits into the capture stage, including animals, complex costumes, [fast motion](https://dimensionstudio.co/work/sky-sports-golf-open-2021/), and so on. If the stage size is a limitation, [you can use a treadmill](https://dimensionstudio.co/work/pretty-green-x-three-adwoa-aboah-lfw/)
 - Volcap stages can capture assets in multiple spectra, e.g. visible light and infrared light, providing accurate training data for applications relying on infrared sensors
 - Cost efficiency - even though volcap shoots are not cheap, the overall cost can be reduced by the fact that during a single shooting day, it is possible to capture many actors
   - Thanks to [existing](https://secure.axyz-design.com/) [libraries](https://renderpeople.com/3d-people/?_product=4d-people) of volcap assets this upfront cost can be skipped altogether and assets can be purchased cheaply for testing
@@ -173,7 +178,23 @@ Volumetric video assets have a couple of compelling properties that can be handy
 
 ## Why not avatars
 
-How do avatars compare to volumetric video? By avatars I mean 3D humans which were created with the traditional VFX / games pipeline. That pipeline involves numerous steps like design, modeling, texturing, shading, rigging, animating, character effects, and so on. In a nutshell for the same cost you can get more realistic and more volcap assets than avatar assets. Because of the realism issues associated with avatars, avatar assets are more likely to contribute to the domain gap than volcap assets.
+How do avatars compare to volumetric video?
+
+By avatars I mean 3D humans which were created with the traditional VFX / games pipeline. That pipeline involves numerous steps like design, modeling, texturing, shading, rigging, animating, character effects, and so on. Production of avatars is slow and expensive: you need a team of experts in different areas, you need to iterate a lot on a single avatar, and the amount of work increases if you are after realistic avatars in motion (you need to worry about muscle simulations, micro movements, realistic animation, hair simulation, cloth simulation, multi-person interaction and so on), which will be important if you worry about the domain gap of your synthetic data.
+
+In a nutshell, for the same cost, you can get more realistic and more volcap assets than avatar assets. Because of the realism issues associated with avatars, avatar assets are more likely to contribute to the domain gap than volcap assets.
+
+Currently, avatars seem to be the dominant approach for adding humans to synthetic datasets. Below I show some examples of typical (in terms of realism) synthetic humans found in today's commercial automotive datasets:
+
+![[source](https://www.skyengine.ai/use-cases/synthetic-data-for-next-gen-driver-monitoring-systems)](images/avatar_skyengine.jpg)
+
+![[source](https://anyverse.ai/in-cabin-monitoring/)](images/avatar_anyverse.jpg)
+
+![[source](https://synthesis.ai/applications/driver-monitoring/)](images/avatar_synthesis.jpg)
+
+These assets required a lot of work and they are pretty good, but they still look more like video game characters than real humans. Here's a volumetric video example for comparison:
+
+![[source](https://actors-hq.com/)](images/example_actorshq.jpg)
 
 While avatars result in a similar output to that of volcap, they are slower and more expensive to produce and generally look less realistic in terms of both appearance and motion. Their advantage of having complete control of appearance, and motion is also their curse since that requires human experts to manually craft them. Production of avatars is less scalable than volcap, probably on the orders of a magnitude and that gap increases even more when you are after photorealistic avatars and you run into the uncanny valley.
 
@@ -198,15 +219,15 @@ Recent advances address some of the limitations [discussed above](#whatisavolume
 - [Infinite-Realities's Spatial Capture](https://www.ir-ltd.net/ir/4dgs/)
   - Utilizes Gaussian splats for a high-quality reconstruction in a commercial setting
 
-Currently a lot of research is spent on radiance fields, Gaussian splats representations which address some challenges of the traditional triangle meshes representation. There is a growing ecosystem around Gaussian splats in the VFX, games pipelines which looks very promising and this representation is already viable in a commercial setting.
+Currently, a lot of research is spent on radiance fields, and Gaussian splats representations which address some challenges of the traditional triangle meshes representation. There is a growing ecosystem around Gaussian splats in the VFX, games pipelines which looks very promising and this representation is already viable in a commercial setting.
 
 # Recap
 
-In this post I've introduced volumetric video, synthetic training data and mentioned some of their advantages and limitations. Then I've compared synthetic data to real world data and proposed how volumetric video could reduce the domain gap of humans in the synthetic data by improving their realism.
+In this post, I've introduced volumetric video, synthetic training data and mentioned some of their advantages and limitations. Then I compared synthetic data to real world data and proposed how volumetric video could reduce the domain gap of humans in the synthetic data by improving their realism.
 
 # Bonus section - various synthetic human datasets
 
-While working on this post I came across a few datasets, sharing some of them below:
+While working on this post I came across a few synthetic datasets containing humans, sharing some of them below:
 
 - 3D
   - Volumetric
@@ -234,6 +255,7 @@ While working on this post I came across a few datasets, sharing some of them be
     - [Synthesis.ai's Static Human Gestures/Poses Dataset](https://opensynthetics.com/dataset/static-human-poses-dataset-by-synthesis-ai/)
     - [Synthesis.ai's Animated Human Gestures/Poses Dataset](https://opensynthetics.com/dataset/animated-humans-dataset-by-synthesis-ai/)
     - [Anyverse's InCabin, ADAS & AD Datasets](https://anyverse.ai/)
+    - [SKY ENGINE AI's Datasets](https://www.skyengine.ai/use-cases/synthetic-data-for-next-gen-driver-monitoring-systems)
     - [Renderpeople's 4D People](https://renderpeople.com/3d-people/?_product=4d-people)
     - [AXYZ's 4D People](https://secure.axyz-design.com/)
 - 2D
