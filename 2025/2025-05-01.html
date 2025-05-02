@@ -35,7 +35,7 @@ In the rest of this post, I will dive into volumetric video, synthetic training 
 
 # What is a volumetric video anyway
 
-A volumetric video (or _free viewpoint video_, sometimes called just _volcap_) lets you freely look around a scene. Unlike a 360° (3 DOF) video - which fixes you in one spot - a volumetric video supports movement through the scene (6 DOF).
+A volumetric video (or _free viewpoint video_, sometimes called just _volcap_) lets you freely look around a scene. Unlike a 360° (3 DOF) video - which fixes you in one spot - a volumetric video supports movement through the scene (6 DOF). Volumetric video is captured at multi-camera stages (like the one below with 106 cameras), and the processed output is an animated 3D object.
 
 [I could talk about volcap for hours](https://jtomori.github.io/fvv_workshop_2021_aka_public/), but I will do my best to keep it brief here :).
 
@@ -138,13 +138,13 @@ There are multiple approaches for minimizing the domain gap, e.g.
 - Making the synthetic data more similar to the real data (see this [blog post](https://paralleldomain.com/not-all-synthetic-datasets-are-created-equal) for an example)
 - Training on a mix of synthetic and real data and then fine-tuning on real data only (see this [blog post](https://www.appliedintuition.com/blog/using-synthetic-data-effectively-at-scale) for an example)
 
-Below, I argue that volumetric video can reduce the domain gap by boosting realism.
+Below, I argue that volumetric video can reduce the domain gap by boosting realism. This follows the [Fake It Till You Make It](#whatissyntheticdataanyway/interestingcasestudies/fakeittillyoumakeit:faceanalysisinthewildusingsyntheticdataalone) observation that increasing the realism of training data enables models to generalize more effectively to real-world data.
 
 # Volumetric video for synthetic data
 
 Now that I have introduced volcap and synthetic data individually, let's talk about how I think volcap could enhance synthetic data.
 
-Detecting humans is central to many vision applications. Real world human data is hard (expensive, dangerous, slow) to collect at scale, and synthetic humans are challenging to hand-craft.
+Identifying and analyzing humans is fundamental to many vision applications. Real world human data is hard (expensive, dangerous, slow) to collect at scale, and synthetic humans are challenging to hand-craft.
 
 Volumetric video provides photorealistic 3D captures of humans in motion, combining the best of real and synthetic data: flexibility and scalability of synthetic with the realism of real.
 
