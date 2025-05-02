@@ -12,11 +12,11 @@ I believe volumetric video combines the benefits of the real world (photorealism
 
 Which of the images below do you find realistic, and which do you not?
 
-![Image 1, [source](https://microsoft.github.io/FaceSynthetics/ target="_blank" rel="noopener noreferrer")](images/intro_fakeit.jpg) ![Image 2, [source](https://github.com/SelfishGene/SFHQ-T2I-dataset target="_blank" rel="noopener noreferrer")](images/intro_sfhq.jpg) ![Image 3, [source](https://actors-hq.com/ target="_blank" rel="noopener noreferrer")](images/intro_actorshq.jpg)
+![Image 1, [source](https://microsoft.github.io/FaceSynthetics/ target="_blank" rel="noopener noreferrer")](images/intro_fakeit.jpg) ![Image 2, [source](https://github.com/SelfishGene/SFHQ-T2I-dataset target="_blank" rel="noopener noreferrer")](images/intro_sfhq.jpg) ![Image 3, [source](https://actors-hq.com/ target="_blank" rel="noopener noreferrer")](images/intro_actorshq_comp.jpg)
 
 To many, the second and third images look real, while the first seems off[^fakeit].
 
-None of these are photographs. In fact, the first is a _3D avatar_, the second was generated with a _"text to image"_ model, and the third comes from a _volumetric video_.
+None of these are photographs. In fact, the first is a _3D avatar_, the second was generated with a _"text to image"_ model, and the third comes from a _volumetric video_[^actorshq].
 
 The gist of this post is that when it comes to the realism of synthetic training data, volumetric video is superior to 3D avatars. Although the "text to image" result looks real, it isn't very useful for 3D use cases.
 
@@ -32,6 +32,8 @@ Each of these types has different properties in terms of realism and flexibility
 In the rest of this post, I will dive into volumetric video, synthetic training data, and their combination.
 
 [^fakeit]: _To be fair - it's still quite good given it's a 3D avatar, but it looks uncanny when compared to the other two and I had to browse through many images in that [dataset](https://www.kaggle.com/datasets/jadesag3/ms-synthetic-face target="_blank" rel="noopener noreferrer") to find a good one, here are some fun ones: [1](images/000004.jpg target="_blank" rel="noopener noreferrer"), [2](images/000005.jpg target="_blank" rel="noopener noreferrer"), [3](images/000015.jpg target="_blank" rel="noopener noreferrer")_
+
+[^actorshq]: _It's a novel view of a volumetric video composited onto a photograph of a stage to avoid a black background_
 
 # What is a volumetric video anyway
 
@@ -93,7 +95,7 @@ Describes a neural network (NN) architecture for predicting steering direction b
 
 To sum it up, the researcher has found that synthetic data was: good enough for training an NN which performed well when presented with real data, it was easier, more flexible, and faster to generate synthetic data than to capture real data, it has resulted in a comparable performance to traditional autonomous driving approaches and has realized that the quality of training data is crucial to the performance of the NN.
 
-[^alvinn]: I find this observation hilarious
+[^alvinn]: _I find this observation hilarious_
 
 ### Fake It Till You Make It: Face analysis in the wild using synthetic data alone
 
