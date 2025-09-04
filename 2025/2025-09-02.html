@@ -12,11 +12,11 @@ The following process can achieve a compression ratio of **18:1** on a typical v
 
 <object type="image/svg+xml" data="images/dng_compress.svg" width="500px"></object>
 
-It can turn this dataset (39 cameras, 3 frames, 12 megapixels, raw DNG, 1 719 MiB in total):
+It can turn this dataset (39 cameras, 3 frames, 12 megapixels, raw DNG, **1 719 MiB** in total):
 
 ![](images/sheet_in_censored_lq.jpg width="500px")
 
-Into this dataset (raw compressed & segmented DNG, 92 MiB in total):
+Into this dataset (raw compressed & segmented DNG, **92 MiB** in total):
 
 ![](images/sheet_out_censored_lq.jpg width="500px")
 
@@ -25,15 +25,17 @@ Both datasets will result in the same resulting volumetric video, but the compre
 !!! note
     *The multi-view dataset courtesy of [IO Industries](https://www.ioindustries.com/), used with permission, the face has been blurred for privacy reasons.*
 
-# What is multi-view data and what is challenging about it
+# What is multi-view data and what is so challenging about it
 
-First, let's explain the need for this to non-experts in the domain.
+Many applications require multi-view data. In cases of photogrammetry, or volumetric video it's a series of images captured in a single or multiple instances in time respectively. Such data is useful for reconstructing a 3D model (which could be 3D printed, or used as a digital asset in games or visual effects), or generating a new viewpoint (which can be useful for volumetric video and various immersive experiences).
 
-This - in case of the volumetric video, there are many other applications though which require a similar dataset.
+Capturing such multi-view data often requires specialized setups and the sheer amount of recorded data (often captured in the highest possible resolution, quality) is often causing a bottleneck in the processing workflow. Teams storing and processing such data require expensive storage hardware requiring a large capital expense on one hand and a fast infrastructure which on the other hand contributes to the operating expenses, especially in case of cloud storage and processing.
 
-Data is heavy - requiring a large capex, fast infra, slows everything down.
+![An example dataset, a second of a such data would take 13.4 GiB of storage and a minute 806 GiB](images/sheet_in_censored_lq.jpg width="250px")
 
 # Workflow breakdown
+
+Now that we understand what does a multi-view data looks like and how much storage it requires, let's take a closer look at each of the proposed optimizations.
 
 ## Debayer
 
@@ -76,4 +78,6 @@ E.g. segmentation, making sure there's a good backup strategy - LTOs, doing this
 
 Even if segmentation sometimes fails, it can be still beneficial overall.
 
-<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
+<!-- Markdeep: -->
+<script>window.markdeepOptions = {tocStyle: 'long'};</script> 
+<style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
