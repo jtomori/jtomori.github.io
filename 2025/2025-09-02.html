@@ -4,23 +4,23 @@
 **Efficient multi view data storage**
 [ <- ](..) _2025-09-02_
 
-Working with volumetric video data (or any other multi-view data) is demanding on storage and can slow things down quite a bit (and make them expensive). In this post I'll explore ways of significantly improving that.
+Working with multi-view data, such as volumetric video, is expensive, slow and demanding on storage. In this post I'll explore ways of significantly improving that.
 
 # TL;DR
 
-The following steps can achieve a compression ratio of **18:1** on a typical volumetric video source footage. This can result in significant savings on the required hardware (or cloud storage costs) and increased processing throughput. The process is lossless in the areas we care about - the subject of our capture - and transparent to downstream applications.
+The following process can achieve a compression ratio of **18:1** on a typical volumetric video source footage. This can result in significant savings on the required hardware (or cloud storage costs) and increased processing throughput. This process is lossless in the areas we care about - the subject of our capture - and transparent to downstream applications.
 
-<object type="image/svg+xml" data="images/dng_compress.svg" width="700px"></object>
+<object type="image/svg+xml" data="images/dng_compress.svg" width="500px"></object>
 
-It can turn this images dataset (39 cameras, 3 frames, 12 megapixels, raw DNG, 1 719 MiB in total):
+It can turn this dataset (39 cameras, 3 frames, 12 megapixels, raw DNG, 1 719 MiB in total):
 
-![](images/sheet_in_censored_lq.jpg width="300px")
+![](images/sheet_in_censored_lq.jpg width="500px")
 
-Into this dataset (raw segmented compressed DNG, 92 MiB in total):
+Into this dataset (raw compressed & segmented DNG, 92 MiB in total):
 
-![](images/sheet_out_censored_lq.jpg width="300px")
+![](images/sheet_out_censored_lq.jpg width="500px")
 
-Such savings can have a great positive impact on storage costs, speed of processing and the overall load on the processing infrastructure.
+Both datasets will result in the same resulting volumetric video, but the compressed one will be much faster and cheaper to process.
 
 !!! note
     *The multi-view dataset courtesy of [IO Industries](https://www.ioindustries.com/), used with permission, the face has been blurred for privacy reasons.*
