@@ -33,20 +33,26 @@ Capturing such multi-view data often requires specialized setups and the sheer a
 
 ![An example dataset, a second of a such data would take 13.4 GiB of storage and a minute 806 GiB](images/sheet_in_censored_lq.jpg width="250px")
 
-# Workflow breakdown
+# Workflow
+
+The key findings from this research are that the [DNG specification](https://helpx.adobe.com/content/dam/help/en/photoshop/pdf/DNG_Spec_1_7_1_0.pdf) allows for various lossless compressions, which alone offer significant savings (with a compression ratio of around 2:1). Another observation is that the background area of the captured frame takes most of the storage space, while not contributing to the result (and often being discarded early in the reconstruction process). The combination of these two ideas leads to the order of magnitude storage reduction.
 
 Now that we understand what does a multi-view data looks like and how much storage it requires, let's take a closer look at each of the proposed optimizations.
 
 ## Debayer
 
-Why, how - half res, relatively low quality
+While both uncompressed and compressed image frames contain raw data (color filter array samples), which is basically a monochromatic image - we need a temporary colour image for segmentation.
+
+This temporary colour image will feed into the following segmentation step. Since the colour image will be discarded, we can perform debayering at a half resolution and with relatively low quality - both of these decisions do not degrade segmentation quality and decrease the computation time needed for the debayering process.
+
+![](images/bayered.png) ![](images/debayered.png)
 
 ## Segmentation
-
+ml model
 Why, how - mention passing srgb-encoded data
 Limitations (props, animals?), how can be improved - models fine tuned to stage-specific data, trained on previous mesh projections
 
-Show lowres vs fullres, cfa vs debayer - to show my process
+Show lowres vs fullres, cfa vs debayer - to show my process, mention srgb-encoded data
 
 ## Mask post-processing
 
@@ -67,6 +73,8 @@ Perf per frame, vol frame, vol second.
 Profiling breakdown
 
 What can be tuned - jxl speed vs size (mention wedging) - like in algos generally.
+
+Mention https://jpegxl.info/resources/distance-vs-effort-visualizer.html
 
 # Results
 
