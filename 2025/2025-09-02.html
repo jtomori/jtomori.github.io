@@ -67,7 +67,7 @@ This process is relatively simple and computationally inexpensive. In this case 
 
 ## Compressing, writing
 
-The DNG specification allows for various lossy, lossless compression schemes, depending on the data being present. In my case I'm interested in lossless JPEG and JPEG XL compressions which compress well both foreground and the zeroed-out background samples.
+The DNG specification allows for various lossy, lossless compression schemes, depending on the data being present. In my case I'm interested in lossless JPEG and JPEG XL compressions which compress well both foreground and the zeroed-out background samples. JPEG XL achieves the best compression ratio, although that comes at a cost, more on that in the next section.
 
 Another aspect of an efficient data storage is to keep them as CFA samples as opposed to debayered RGB pixels, which would lead to tripling of the size of our data (keeping bit depth constant). This not only helps to keep file size small, but also means that all of our steps are transparent to the downstream reconstruction applications - they will keep receiving the CFA samples as they probably have used to.
 
@@ -75,11 +75,9 @@ Another important step for making this process transparent and non-destructive i
 
 ![Source CFA samples](images/cfa_src.png width="340px") ![Masked CFA samples ready for compression](images/cfa_masked.png width="340px")
 
-Why, how, also test jpeg-only compression, compare.
-
 # How fast it is, how small can it get
 
-Perf per frame, vol frame, vol second.
+Perf per frame, vol frame, vol second - both jpeg xl and jpeg.
 
 Profiling breakdown
 
