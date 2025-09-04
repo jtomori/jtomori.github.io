@@ -1,0 +1,79 @@
+<meta charset="utf-8" lang="en">
+<link href="../styles.css" rel="stylesheet">
+
+**Efficient multi view data storage**
+[ <- ](..) _2025-09-02_
+
+Working with volumetric video data (or any other multi-view data) is demanding on storage and can slow things down quite a bit (and make them expensive). In this post I'll explore ways of significantly improving that.
+
+# TL;DR
+
+The following steps can achieve a compression ratio of **18:1** on a typical volumetric video source footage. This can result in significant savings on the required hardware (or cloud storage costs) and increased processing throughput. The process is lossless in the areas we care about - the subject of our capture - and transparent to downstream applications.
+
+<object type="image/svg+xml" data="images/dng_compress.svg" width="700px"></object>
+
+It can turn this images dataset (39 cameras, 3 frames, 12 megapixels, raw DNG, 1 719 MiB in total):
+
+![](images/sheet_in_censored_lq.jpg width="300px")
+
+Into this dataset (raw segmented compressed DNG, 92 MiB in total):
+
+![](images/sheet_out_censored_lq.jpg width="300px")
+
+Such savings can have a great positive impact on storage costs, speed of processing and the overall load on the processing infrastructure.
+
+!!! note
+    *The multi-view dataset courtesy of [IO Industries](https://www.ioindustries.com/), used with permission, the face has been blurred for privacy reasons.*
+
+# What is multi-view data and what is challenging about it
+
+First, let's explain the need for this to non-experts in the domain.
+
+This - in case of the volumetric video, there are many other applications though which require a similar dataset.
+
+Data is heavy - requiring a large capex, fast infra, slows everything down.
+
+# Workflow breakdown
+
+## Debayer
+
+Why, how - half res, relatively low quality
+
+## Segmentation
+
+Why, how - mention passing srgb-encoded data
+Limitations (props, animals?), how can be improved - models fine tuned to stage-specific data, trained on previous mesh projections
+
+Show lowres vs fullres, cfa vs debayer - to show my process
+
+## Mask post-processing
+
+Why, how - dilating, upsampling 
+
+## Compress
+
+Why, how, also test jpeg-only compression, compare.
+
+Store as CFA data as opposed to a rgb data - also make it transparent to downstream apps, make sure to preserve all dng tags.
+
+Show the cfa mono image to illustrate it
+
+# How fast it is, how small can it get
+
+Perf per frame, vol frame, vol second.
+
+Profiling breakdown
+
+What can be tuned - jxl speed vs size (mention wedging) - like in algos generally.
+
+# Results
+
+Making sure my stuff is lossless (explaining how), benefits - cheaper storage, faster processing - i/o etc, because of the preserved metadata the dng looks identical to the one produced by camera and downstream apps (assuming they use recent dng sdk) can consume these just fine.
+
+# Limitations
+
+E.g. segmentation, making sure there's a good backup strategy - LTOs, doing this only for hot data. Being able to access the uncompressed data for cases where segmentation turned out to be lossy - show it's a low risk process.
+
+Even if segmentation sometimes fails, it can be still beneficial overall.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="../markdeep.min.js" charset="utf-8"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
