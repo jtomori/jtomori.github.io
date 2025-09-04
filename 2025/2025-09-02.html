@@ -20,7 +20,7 @@ Into this dataset (raw compressed & segmented DNG, **92 MiB** in total):
 
 ![](images/sheet_out_censored_lq.jpg width="500px")
 
-Both datasets will result in the same resulting volumetric video, but the compressed one will be much faster and cheaper to process.
+Both datasets will result in the same resulting volumetric video, but the compressed one will be much easier on storage, but also will be faster and cheaper to process.
 
 !!! note
     *The multi-view dataset courtesy of [IO Industries](https://www.ioindustries.com/), used with permission, the face has been blurred for privacy reasons.*
@@ -29,9 +29,9 @@ Both datasets will result in the same resulting volumetric video, but the compre
 
 Many applications require multi-view data. In cases of photogrammetry, or volumetric video it's a series of images captured in a single or multiple instances in time respectively. Such data is useful for reconstructing a 3D model (which could be 3D printed, or used as a digital asset in games or visual effects), or generating a new viewpoint (which can be useful for volumetric video and various immersive experiences).
 
-Capturing such multi-view data often requires specialized setups and the sheer amount of recorded data (often captured in the highest possible resolution, quality) is often causing a bottleneck in the processing workflow. Teams storing and processing such data require expensive storage hardware requiring a large capital expense on one hand and a fast infrastructure which on the other hand contributes to the operating expenses, especially in case of cloud storage and processing.
+Capturing such multi-view data often requires specialized setups and the sheer amount of recorded data (often captured in the highest possible resolution, quality) is often causing a bottleneck in the processing pipeline. Teams storing and processing such data require expensive storage hardware, fast infrastructure requiring a large capital expense on one hand and a slow processing of the data contributes to the operating expenses, especially in case of cloud storage and processing.
 
-![An example dataset, a second of a such data would take 13.4 GiB of storage and a minute 806 GiB](images/sheet_in_censored_lq.jpg width="250px")
+![An example dataset, a second of a such data would take 13.4 GiB and a minute would take 806 GiB](images/sheet_in_censored_lq.jpg width="300px")
 
 # Workflow
 
@@ -41,11 +41,11 @@ Now that we understand what does a multi-view data looks like and how much stora
 
 ## Debayer
 
-While both uncompressed and compressed image frames contain raw data (color filter array samples), which is basically a monochromatic image - we need a temporary colour image for segmentation.
+While both uncompressed and compressed image frames contain raw data (Colour Filter Array samples), which is basically a monochromatic image - we need a temporary colour image for segmentation.
 
 This temporary colour image will feed into the following segmentation step. Since the colour image will be discarded, we can perform debayering at a half resolution and with relatively low quality - both of these decisions do not degrade segmentation quality and decrease the computation time needed for the debayering process.
 
-![](images/bayered.png) ![](images/debayered.png)
+![Raw (CFA) samples](images/bayered.png width="340px") ![Debayered RGB pixels](images/debayered.png width="340px")
 
 ## Segmentation
 ml model
