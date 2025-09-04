@@ -10,7 +10,7 @@ Working with multi-view data, such as volumetric video, is expensive, slow and d
 
 The following process can achieve a compression ratio of **18:1** on a typical volumetric video source footage. This can result in significant savings on the required hardware (or cloud storage costs) and increased processing throughput. This process is lossless in the areas we care about - the subject of our capture - and transparent to downstream applications.
 
-<object type="image/svg+xml" data="images/dng_compress.svg" width="500px"></object>
+<object type="image/svg+xml" data="images/dng_compress.svg" width="540px"></object>
 
 It can turn this dataset (39 cameras, 3 frames, 12 megapixels, raw DNG, **1 719 MiB** in total):
 
@@ -41,22 +41,27 @@ Now that we understand what does a multi-view data looks like and how much stora
 
 ## Debayer
 
-While both uncompressed and compressed image frames contain raw data (Colour Filter Array samples), which is basically a monochromatic image - we need a temporary colour image for segmentation.
+While both uncompressed and compressed image frames contain raw data (Colour Filter Array or CFA samples), which is basically a monochromatic image - we need a temporary colour image for accurate segmentation.
 
 This temporary colour image will feed into the following segmentation step. Since the colour image will be discarded, we can perform debayering at a half resolution and with relatively low quality - both of these decisions do not degrade segmentation quality and decrease the computation time needed for the debayering process.
 
 ![Raw (CFA) samples](images/bayered.png width="340px") ![Debayered RGB pixels](images/debayered.png width="340px")
 
 ## Segmentation
-ml model
-Why, how - mention passing srgb-encoded data
-Limitations (props, animals?), how can be improved - models fine tuned to stage-specific data, trained on previous mesh projections
 
-Show lowres vs fullres, cfa vs debayer - to show my process, mention srgb-encoded data
+Segmentation - separating foreground from the background - is a key optimization, because it let's us zero out background samples which will lead to large size savings during the compression stage. I perform this step with an off the shelf library implementing various machine learning models.
+
+After some testing I've found out that segmentation at half-resolution and full resolution looks identical (the library is significantly downsampling my inputs anyway) and that sRGB-encoded pixels result in the highest quality, with linear-encoded pixels delivering worse quality and raw CFA samples (either all, or from individual channels) resulted in the lowest quality segmentation.
+
+![Segmentation applied to RGB pixels](images/seg_rgb.jpg width="340px") ![Segmentation applied to CFA samples](images/seg_bayered.jpg width="340px")
+
+Such segmentation is sensitive to the foreground - it might miss out animals, or props - depending on the categories that the model has been trained on. This can be a limitation in some industries, but can be overcome by training a custom segmentation model on an application-specific dataset, e.g. by using projected previous unsegmented reconstructions as ground truth labels.
 
 ## Mask post-processing
 
-Why, how - dilating, upsampling 
+Why, how - thresholding, dilating, upsampling 
+
+Dilation adds to size, but reduces chances of missin fg
 
 ## Compress
 
