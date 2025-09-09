@@ -69,31 +69,80 @@ This process is relatively simple and computationally inexpensive. In this case 
 
 The DNG specification allows for various lossy, lossless compression schemes, depending on the data being present. In my case I'm interested in lossless JPEG and JPEG XL compressions which compress well both foreground and the zeroed-out background samples. JPEG XL achieves the best compression ratio, although that comes at a cost, more on that in the next section.
 
-Another aspect of an efficient data storage is to keep them as CFA samples as opposed to debayered RGB pixels, which would lead to tripling of the size of our data (keeping bit depth constant). This not only helps to keep file size small, but also means that all of our steps are transparent to the downstream reconstruction applications - they will keep receiving the CFA samples as they probably have used to.
+Another aspect of an efficient data storage is to keep them as CFA samples as opposed to debayered RGB pixels, which would lead to inflation of the size of our data. This not only helps to keep file size small, but also means that all of our steps are transparent to the downstream reconstruction applications - they will keep receiving the CFA samples as they probably have used to.
 
 Another important step for making this process transparent and non-destructive is to copy all of the input DNG tags.
 
 ![Source CFA samples](images/cfa_src.png width="340px") ![Masked CFA samples ready for compression](images/cfa_masked.png width="340px")
 
-# How fast it is, how small can it get
+# How fast is it, how small can it get
 
-Perf per frame, vol frame, vol second - both jpeg xl and jpeg.
+Here are some numbers to give you a sense of size savings and the required computation time based on the profiling I've done for the two different compressions: JPEG XL and JPEG.
 
-Profiling breakdown
+**JPEG XL**
 
-What can be tuned - jxl speed vs size (mention wedging) - like in algos generally and also the dilation iters.
+- Compression
+  - Input size: 1 719 MiB
+  - Compressed size: 92 MiB
+  - Ratio: 18:1
+- Time
+  - 98 seconds for 117 images, or 0.84 seconds per single image
+  - A single volumetric frame (70 x 12 megapixel cameras) would take a minute to compress
+  - A volumetric second (24 fps) would take 24 minutes to compress
 
-Mention https://jpegxl.info/resources/distance-vs-effort-visualizer.html
+**JPEG**
+
+- Compression
+  - Input size: 1 719 MiB
+  - Compressed size: 374 MiB
+  - Ratio: 4:1
+- Time
+  - 57 seconds for 117 images, or 0.49 seconds per single image
+  - A single volumetric frame (70 x 12 megapixel cameras) would take 35 seconds to compress
+  - A volumetric second (24 fps) would take 14 minutes to compress
+
+I've run those tests on my modest laptop with an Intel i5, 8 x 2.4 GHz CPU and 16 GiB of RAM. Checking flameprof in case of JPEG XL revealed the following relative contributions to the computation time - debayering: 10%, segmenting: 30%, post-processing mask: 2%, compression: 58%. The memory usage was about the same for both compression tests.
+
+There are a couple of parameters that can be tuned:
+
+- Mask dilation iterations in the post-processing step
+  - A higher number decreases slightly the compression ratio, but decreases the probability of an incorrect segmentation. It has a minimal impact on the computation time.
+- JPEG XL compression parameters: compression effort and decoding speed
+  - After testing all possible combinations I've settled on effort = 5 and speed = 0 which give a pretty good time vs compression ratio.
+  - [This](https://jpegxl.info/resources/distance-vs-effort-visualizer.html) is a handy resource.
+
+These parameters offer various space vs time vs reliability tradeoffs - like usually happens in algorithms in general.
+
+One optimization I haven't tried is running the segmentation on a GPU which could slightly improve the overall speed.
+
+Another test I've done with JPEG XL was to skip the segmentation step to see how well the data would compress without it:
+
+**JPEG XL, without segmentation**
+
+- Compression
+  - Input size: 1 719 MiB
+  - Compressed size: 1 121 MiB
+  - Ratio: 1.5:1
+- Time
+  - 80 seconds for 117 images, or 0.68 seconds per single image
+  - A single volumetric frame (70 x 12 megapixel cameras) would take 50 seconds to compress
+  - A volumetric second (24 fps) would take 20 minutes to compress
+
+From this it's clear that the segmentation is key in providing the high compression ratio. But even without it it can be still a worthwhile effort in some edge cases - where segmentation could fail for various reasons.
 
 # Results
 
 Making sure my stuff is lossless (explaining how), benefits - cheaper storage, faster processing - i/o etc, because of the preserved metadata the dng looks identical to the one produced by camera and downstream apps (assuming they use recent dng sdk) can consume these just fine.
 
+Mention dng_validate from dng sdk, testing losslessness of written samples
+
 # Limitations
 
-E.g. segmentation, making sure there's a good backup strategy - LTOs, doing this only for hot data. Being able to access the uncompressed data for cases where segmentation turned out to be lossy - show it's a low risk process.
+The largest one is the extra needed computation - probably a farm, should scale almost linearly with the # of nodes being used (assuming the network wouldn't get saturated)
 
-Even if segmentation sometimes fails, it can be still beneficial overall.
+E.g. segmentation, making sure there's a good backup strategy - LTOs, doing this only for hot data. Being able to access the uncompressed data for cases where segmentation turned out to be lossy - show it's a low risk process (or simply disable segmentation on tricky shots / camera angles).
+
+Even if segmentation sometimes fails, it can be still beneficial overall - e.g. by skipping segmentation and doing jxl only, or doing it only on certain projects.
 
 <!-- Markdeep: -->
 <script>window.markdeepOptions = {tocStyle: 'long'};</script> 
