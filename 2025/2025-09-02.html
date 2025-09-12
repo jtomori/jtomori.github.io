@@ -132,17 +132,19 @@ From this it's clear that the segmentation is key in providing the high compress
 
 # Results
 
-Making sure my stuff is lossless (explaining how), benefits - cheaper storage, faster processing - i/o etc, because of the preserved metadata the dng looks identical to the one produced by camera and downstream apps (assuming they use recent dng sdk) can consume these just fine.
+Overall I'm pretty happy with the results, they resulted in a better compression ratio than I've initially hoped for. A compression ratio of **18:1** can have very positive effects on the downstream processing pipeline, including a cheaper storage, faster processing (because of faster input, output), lower load on the network infrastructure.
 
-Mention dng_validate from dng sdk, testing losslessness of written samples
+During my tests I made sure that the resulting DNGs are valid according the specification (with the help of the Adobe DNG SDK), they carry over all of the metadata and that the compression is truly lossless (reading written pixels back and comparing with the input pixels). Any application using a recent version of the Adobe DNG SDK should accept the compressed raw DNGs without any changes - in the same way as they'd accept the uncompressed raw DNGs.
 
 # Limitations
 
-The largest one is the extra needed computation - probably a farm, should scale almost linearly with the # of nodes being used (assuming the network wouldn't get saturated)
+While the compression ratio looks very appealing, there are some considerations to keep in mind.
 
-E.g. segmentation, making sure there's a good backup strategy - LTOs, doing this only for hot data. Being able to access the uncompressed data for cases where segmentation turned out to be lossy - show it's a low risk process (or simply disable segmentation on tricky shots / camera angles).
+I think the largest drawback of this method is the need for the extra step in the processing pipeline and the extensive computation needed for it. On the other hand the compression step is suitable for parallelization, so additional processing computers would almost linearly speed up the process.
 
-Even if segmentation sometimes fails, it can be still beneficial overall - e.g. by skipping segmentation and doing jxl only, or doing it only on certain projects.
+Another potential limitation is the accuracy of segmentation, which might fail for certain captures - those including content that the segmentation cannot differentiate from the background. An extreme lighting, or camera angles can also result in lossy segmentation. A workaround for that could be disabling segmentation for the problematic content (but still run the lossless compression for some modest size saving).
+
+For a such step I'd recommend having two tiers of storage: one cold (cheap, slow to access, larger capacity) for backing up the original uncompressed DNGs and the other one - hot (more expensive, faster to access, smaller capacity) for storing the compressed files used for processing. Then in situations where the segmentation has turned out incorrect it's possible to fall back to the uncompressed files. This removes the risk associated with this process at the cost of extra file management. Whether this is viable depends on the content of captures and how good the segmentation is.
 
 <!-- Markdeep: -->
 <script>window.markdeepOptions = {tocStyle: 'long'};</script> 
