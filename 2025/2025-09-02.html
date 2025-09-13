@@ -51,9 +51,9 @@ This temporary colour image will fed into the following segmentation step. Since
 
 Segmentation - separating foreground from the background - is a key optimization, because it let's us zero out background samples which will lead to large size savings during the compression stage. I perform this step with an off-the-shelf library implementing various machine learning models.
 
-After some testing I've found out that segmentation at half-resolution and full resolution looks identical (the library is significantly downsampling my inputs anyway) and that sRGB-encoded pixels result in the highest quality, with linear-encoded pixels delivering worse quality and raw CFA samples (either all, or from individual channels) resulted in the lowest quality segmentation.
+After some testing I've found out that segmentation at half-resolution and full resolution looks identical (the library is significantly downsampling my inputs anyway) and that sRGB-encoded pixels result in the highest quality, with linear-encoded pixels delivering worse quality and raw CFA samples (either all, or from individual channels) resulted in the lowest quality segmentation. See how the semgentation performed on various inputs below:
 
-![Segmentation applied to RGB pixels](images/seg_mask.png width="340px") ![Segmentation applied to CFA samples](images/seg_bayered.jpg width="340px")
+![sRGB-encoded RGB pixels](images/seg_mask.png width="220px") ![Linearly-encoded RGB pixels](images/seg_linear.png width="220px") ![CFA samples](images/seg_bayered.jpg width="220px")
 
 Such segmentation is sensitive to the content of foreground - it might miss out animals, or props - depending on the categories that the model has been trained on. This can be a limitation in some industries, but can be overcome by training a custom segmentation model on an application-specific dataset, e.g. by using projected previous unsegmented reconstructions as ground truth labels.
 
@@ -67,7 +67,7 @@ This process is relatively simple and computationally inexpensive. In this case 
 
 ## Compressing, writing
 
-The DNG specification allows for various lossy, lossless compression schemes, depending on the data being stored. In my case I'm interested in lossless JPEG and JPEG XL compressions which compress well both foreground and the zeroed-out background samples. JPEG XL achieves the best compression ratio, although that comes at a computational cost, more on that in the next section.
+The DNG specification allows for various lossy, lossless compression schemes, depending on the data being stored. In my case I'm interested in lossless JPEG and lossless JPEG XL compressions (not to be confused with the lossy variants) which compress well both foreground and the zeroed-out background samples. JPEG XL achieves the best compression ratio, although that comes at a computational cost, more on that in the next section.
 
 Another aspect of an efficient data storage is to keep the captured data as CFA samples as opposed to debayered RGB pixels, which would lead to inflation of the size of our data. This not only helps to keep file size small, but also means that all of our steps are transparent to the downstream reconstruction applications - they will keep receiving the CFA samples as they probably have used to.
 
