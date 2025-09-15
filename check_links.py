@@ -17,7 +17,8 @@ SKIPLIST = [
     "https://dl.acm.org",
     "https://www.unrealengine.com",
     "https://www.fxguide.com",
-    "https://www.kaggle.com"
+    "https://www.kaggle.com",
+    "https://helpx.adobe.com"
 ]
 
 
