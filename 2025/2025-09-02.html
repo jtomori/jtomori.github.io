@@ -25,7 +25,7 @@ Both datasets produce the same volumetric video after reconstruction, but the co
 
 # What is multi-view data and what makes it challenging
 
-Many applications require multi-view data. In photogrammetry, that means multiple viewpoints captured at a single moment. In volumetric video, it means multiple viewpoints captured over time. This data is used to reconstruct 3D geometry (for games, VFX, 3D printing) or to render novel viewpoints (useful for volumetric video and immersive experiences).
+Many applications require multi-view data. In photogrammetry, that means multiple viewpoints captured at a single moment. In volumetric video, it means multiple viewpoints captured over time. This data is used to reconstruct 3D geometry (for VFX, games, 3D printing) or to render novel viewpoints (useful for volumetric video and immersive experiences).
 
 Capturing multi-view data usually requires specialized camera rigs, and the sheer volume of recorded data (often captured at the highest spatial and temporal resolution and bit depth) frequently becomes the bottleneck in the processing pipeline. Teams that store and process this data need expensive storage hardware and fast infrastructure, which creates a large capital expense when starting out. On the other hand, slow processing increases operating expenses, especially when using cloud storage and processing.
 
@@ -54,7 +54,7 @@ We generate a temporary colour image by debayering, but only at half resolution 
 
 ## Segmenting
 
-Segmentation - separating foreground from background - is the core optimization. Zeroing background CFA samples yields large savings in the subsequent lossless compression step. I run segmentation using an off-the-shelf library that implements several ML-based models.
+Segmentation - separating foreground from background - is the core optimization. Zeroing background CFA samples yields large savings in the subsequent compression step. I run segmentation using an off-the-shelf library that implements several ML-based models.
 
 In my tests, half-resolution debayered images produced the same masks as full resolution (the library downscales inputs internally). I also observed that sRGB-encoded RGB inputs gave the best masks, linear-encoded RGB gave worse results, and raw CFA inputs (either combined or single-channel) produced the least accurate masks. Examples below show the difference in mask quality for different inputs:
 
@@ -80,7 +80,7 @@ Keeping the data as CFA samples (rather than expanding to RGB) prevents file siz
 
 # How fast is it, how small can it get
 
-Now that the workflow is described, here are numbers that show the space savings and required compute time for the two compression schemes I tested: JPEG XL and JPEG.
+Now that the workflow is described, here are numbers that show the space savings and required compute time for the two compression schemes I have tested: JPEG XL and JPEG.
 
 **JPEG XL**
 
@@ -126,7 +126,7 @@ I also tested JPEG XL without the segmentation step:
   - A single volumetric frame (70 x 12 megapixel cameras) would take ≈ 50 seconds to compress
   - A volumetric second (24 fps) would take ≈ 20 minutes to compress
 
-This makes clear that segmentation is the key to achieving the high (18:1) compression ratios. Even without segmentation, however, lossless compression can still be useful in some edge cases.
+This makes it clear that segmentation is the key to achieving the high (18:1) compression ratios. Even without segmentation, however, lossless compression can still be useful in some edge cases.
 
 # Results
 
@@ -138,7 +138,7 @@ I validated the output DNGs with the Adobe DNG SDK: the files are valid accordin
 
 There are a few caveats to keep in mind.
 
-- **Extra processing step.** The pipeline adds CPU work (compressing, segmentating, debayering and post-processing). That increases processing cost, but the process is highly parallelizable: adding more machines nearly linearly reduces processing time because each machine can process a different subset of images.
+- **Extra processing step.** The pipeline adds CPU work (compressing, segmenting, debayering and post-processing). That increases processing cost, but the process is highly parallelizable: adding more machines nearly linearly reduces processing time because each machine can process a different subset of images.
 
 - **Segmentation accuracy.** Off-the-shelf segmentation models can fail on uncommon foreground content (certain props, animals, or costumes). Workarounds include training a domain-specific segmentation model or disabling segmentation for problematic captures (you still get the benefit of lossless compression in that case, although with a lower ratio).
 
