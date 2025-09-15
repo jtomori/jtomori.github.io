@@ -4,11 +4,11 @@
 **Efficient multi view data storage**
 [ <- ](..) _2025-09-02_
 
-Working with multi-view data, such as in the case of volumetric video, is very demanding on storage and therefore expensive and slow. In this post I'll explore ways of significantly improving that.
+Working with multi-view data - for example, volumetric video - is demanding on storage, and therefore expensive and slow. In this post I explore practical ways to reduce that cost.
 
 # TL;DR
 
-The following pre-processing pipeline can achieve a compression ratio of **18:1** on a typical volumetric video source footage. This can result in significant savings on the required hardware costs (or cloud storage) and increased processing throughput. This process is lossless in the areas we care about - the subject of our capture - and transparent to downstream applications.
+The preprocessing pipeline below can achieve an **18:1** compression ratio on typical volumetric-video source footage. That reduces hardware (or cloud storage) costs and increases processing throughput. The process is lossless where it matters (the captured subject) and is transparent to downstream applications.
 
 It can turn this sample dataset (39 cameras, 3 frames, 12 megapixels, raw DNG, **1 719 MiB** in total):
 
@@ -18,66 +18,69 @@ Into this dataset (raw compressed & segmented DNG, **92 MiB** in total):
 
 ![](images/sheet_out_censored_lq.jpg width="500px")
 
-Both datasets will result in the same resulting volumetric video once processed, but the compressed one will not only be much lighter on storage, but also will be faster and cheaper to process.
+Both datasets produce the same volumetric video after reconstruction, but the compressed version is much lighter to store and faster / cheaper to process.
 
 !!! note
-    *The multi-view dataset courtesy of [IO Industries](https://www.ioindustries.com target="_blank" rel="noopener noreferrer"), used with permission, the face has been blurred for privacy reasons.*
+    *The multi-view dataset is courtesy of [IO Industries](https://www.ioindustries.com target="_blank" rel="noopener noreferrer"), used with permission, the face has been blurred for privacy*
 
-# What is multi-view data and what is so challenging about it
+# What is multi-view data and what makes it challenging
 
-Many applications require multi-view data. In cases of photogrammetry, or volumetric video it's a series of multiple viewpoints captured in a single or multiple instances in time respectively. Such data is useful for reconstructing a 3D model (which could be used as a digital asset in games or visual effects, or 3D printed), or rendering a novel viewpoint (which can be useful for volumetric video and various immersive experiences).
+Many applications require multi-view data. In photogrammetry, that means multiple viewpoints captured at a single moment. In volumetric video, it means multiple viewpoints captured over time. This data is used to reconstruct 3D geometry (for games, VFX, 3D printing) or to render novel viewpoints (useful for volumetric video and immersive experiences).
 
-Capturing such multi-view data often requires specialized setups and the sheer amount of recorded data (often captured in the highest possible spatial and temporal resolution, bit depth) is often causing a bottleneck in the processing pipeline. Teams storing and processing such data require expensive storage hardware, fast infrastructure requiring a large capital expense when starting out. One the other hand a slow processing of the data contributes to the operating expenses, especially in case of cloud storage and processing.
+Capturing multi-view data usually requires specialized camera rigs, and the sheer volume of recorded data (often captured at the highest spatial and temporal resolution and bit depth) frequently becomes the bottleneck in the processing pipeline. Teams that store and process this data need expensive storage hardware and fast infrastructure, which creates a large capital expense when starting out. On the other hand, slow processing increases operating expenses, especially when using cloud storage and processing.
 
-![An example dataset, a 24fps second would take 13.4 GiB and a minute would take 806 GiB](images/sheet_in_censored_lq.jpg width="300px")
+![An example dataset: a 24fps second would take 13.4 GiB, a minute would take 806 GiB](images/sheet_in_censored_lq.jpg width="300px")
 
 # Workflow
 
-The key findings from this research are that the [DNG specification](https://helpx.adobe.com/content/dam/help/en/photoshop/pdf/DNG_Spec_1_7_1_0.pdf  target="_blank" rel="noopener noreferrer") allows for various lossless compressions, which alone offer significant savings (with compression ratios up to 2:1). Another observation is that the background area of the captured frame contributes most to the used space, while not contributing to the resulting pixels at all (it is often being discarded early in the reconstruction process). The combination of these two ideas reduces the required storage by an order of a magnitude.
+The key findings from this work are:
 
-Now that we understand what does a multi-view data looks like and how much storage it requires, let's take a closer look at each of the steps in the proposed workflow:
+- the [DNG specification](https://helpx.adobe.com/content/dam/help/en/photoshop/pdf/DNG_Spec_1_7_1_0.pdf target="_blank" rel="noopener noreferrer") supports several lossless compression methods, which alone can provide meaningful savings (up to about 2:1 in some cases), and
+- most of the recorded pixels are background that never contribute to the final reconstruction and can be safely removed prior to compression.
+
+Combining these two ideas reduces required storage by an order of magnitude.
+
+Now that we understand what multi-view data looks like and how much storage it requires, let's take a closer look at each step in the proposed workflow:
 
 <object type="image/svg+xml" data="images/dng_compress.svg" width="540px"></object>
 
 ## Debayering
 
-While both uncompressed input and compressed output image frames contain raw data (Colour Filter Array or CFA samples, which is basically a monochromatic image), we need a temporary colour image for a more accurate segmentation.
+Both the uncompressed input and the compressed output store raw Colour Filter Array samples (CFA - monochromatic sensor samples). However, for accurate segmentation we need a temporary colour image.
 
-This temporary colour image will fed into the following segmentation step. Since the colour image will be discarded afterwards, we can perform debayering at a half resolution and with a relatively low quality - both of these decisions do not degrade the segmentation quality and speed up the debayering step.
+We generate a temporary colour image by debayering, but only at half resolution and with modest quality. Because the colour image is used only for segmentation and discarded afterwards, half-resolution, low-cost debayering gives the same segmentation quality while being faster.
 
 ![Raw (CFA) samples](images/bayered.png width="340px") ![Debayered RGB pixels](images/debayered.png width="340px")
 
 ## Segmenting
 
-Segmentation - separating foreground from the background - is a key optimization, because it let's us zero out background samples which will lead to large size savings during the compression stage. I perform this step with an off-the-shelf library implementing various machine learning based segmentation models.
+Segmentation - separating foreground from background - is the core optimization. Zeroing background CFA samples yields large savings in the subsequent lossless compression step. I run segmentation using an off-the-shelf library that implements several ML-based models.
 
-After some testing I've found out that segmentation at half-resolution and full resolution looks identical (the library is significantly downsampling my inputs anyway) and that sRGB-encoded pixels result in the highest quality, with linear-encoded pixels delivering worse quality and raw CFA samples (either all, or from individual channels) resulted in the lowest quality segmentation. See how the semgentation performed on various inputs below:
+In my tests, half-resolution debayered images produced the same masks as full resolution (the library downscales inputs internally). I also observed that sRGB-encoded RGB inputs gave the best masks, linear-encoded RGB gave worse results, and raw CFA inputs (either combined or single-channel) produced the least accurate masks. Examples below show the difference in mask quality for different inputs:
 
 ![sRGB-encoded RGB pixels](images/seg_mask.png width="220px") ![Linearly-encoded RGB pixels](images/seg_linear.png width="220px") ![CFA samples](images/seg_bayered.jpg width="220px")
 
-Such segmentation is sensitive to the content of foreground - it might miss out animals, or props - depending on the categories that the model has been trained on. This can be a limitation in some industries, but can be overcome by training a custom segmentation model on an application-specific dataset, e.g. by using projected previous unsegmented reconstructions as ground truth labels.
+Note: segmentation quality depends on the model's training data. It can miss unusual foreground content (animals, props, unusual clothing). This can be mitigated by training a domain-specific segmentation model using previously reconstructed frames as ground truth.
 
 ## Mask post-processing
 
-Before masking our CFA samples by the segmentation mask it's necessary to process our mask slightly to reduce the chance of loosing foreground by inaccurate segmentation. Segmentation boundaries sometimes can "leak" into the foreground, e.g. in motion-blurred areas.
+Before applying the segmentation mask to the CFA samples, we post-process the mask to reduce the risk of losing true foreground pixels. Segmentation boundaries can "leak" into motion-blurred or uncertain areas.
 
-This process is relatively simple and computationally inexpensive. In this case I threshold the segmentation to get a binary mask, dilate it by a set number of iterations and then upsample to match the source resolution. The number of dilations provides me with a control of confidence versus resulting size.
+The post-processing is simple and cheap: threshold the probability mask to a binary mask, dilate it a configurable number of iterations, then upsample to the source resolution. The dilation parameter trades off confidence versus compressed size: more dilation reduces the chance of clipped foreground at the cost of slightly larger files.
 
 ![Segmentation](images/seg_mask.png width="340px") ![Post-processed mask](images/seg_mask_processed.png width="340px")
 
-## Compressing, writing
+## Compressing and writing
 
-The DNG specification allows for various lossy, lossless compression schemes, depending on the data being stored. In my case I'm interested in lossless JPEG and lossless JPEG XL compressions (not to be confused with the lossy variants) which compress well both foreground and the zeroed-out background samples. JPEG XL achieves the best compression ratio, although that comes at a computational cost, more on that in the next section.
+The DNG format supports several compression schemes. For this pipeline I've tested lossless JPEG and lossless JPEG XL (distinct from their lossy counterparts). Both compress foreground and zeroed background effectively. JPEG XL gives the best ratio but is more computationally expensive.
 
-Another aspect of an efficient data storage is to keep the captured data as CFA samples as opposed to debayered RGB pixels, which would lead to inflation of the size of our data. This not only helps to keep file size small, but also means that all of our steps are transparent to the downstream reconstruction applications - they will keep receiving the CFA samples as they probably have used to.
-
-Another important step for making this process transparent and non-destructive is to copy all of the input DNG tags to make sure that the data is interpreted as intended.
+Keeping the data as CFA samples (rather than expanding to RGB) prevents file size inflation and preserves compatibility with downstream reconstruction tools - they continue to receive CFA samples exactly as before. To remain non-destructive and transparent, I copy all input DNG tags into the output files so that metadata and interpretation of CFA samples remain unchanged.
 
 ![Source CFA samples](images/cfa_src.png width="340px") ![Masked CFA samples ready for compression](images/cfa_masked.png width="340px")
 
 # How fast is it, how small can it get
 
-Now that we've described all steps in the workflow, let's analyze the results. Here are some numbers to give you a sense of size savings and the required computation time for the two different compression schemes: JPEG XL and JPEG.
+Now that the workflow is described, here are numbers that show the space savings and required compute time for the two compression schemes I tested: JPEG XL and JPEG.
 
 **JPEG XL**
 
@@ -86,9 +89,9 @@ Now that we've described all steps in the workflow, let's analyze the results. H
   - Compressed size: 92 MiB
   - Ratio: 18:1
 - Time
-  - 98 seconds for 117 images, or 0.84 seconds per single image
-  - A single volumetric frame (70 x 12 megapixel cameras) would take a minute to compress
-  - A volumetric second (24 fps) would take 24 minutes to compress
+  - 98 seconds for 117 images (≈ 0.84 s per image)
+  - A single volumetric frame (70 x 12 megapixel cameras) would take ≈ minute to compress
+  - A volumetric second (24 fps) would take ≈ 24 minutes to compress
 
 **JPEG**
 
@@ -97,25 +100,20 @@ Now that we've described all steps in the workflow, let's analyze the results. H
   - Compressed size: 374 MiB
   - Ratio: 4:1
 - Time
-  - 57 seconds for 117 images, or 0.49 seconds per single image
-  - A single volumetric frame (70 x 12 megapixel cameras) would take 35 seconds to compress
-  - A volumetric second (24 fps) would take 14 minutes to compress
+  - 57 seconds for 117 images (≈ 0.49 s per image)
+  - A single volumetric frame (70 x 12 megapixel cameras) would take ≈ 35 seconds to compress
+  - A volumetric second (24 fps) would take ≈ 14 minutes to compress
 
-I've run those tests on my modest laptop with an Intel i5, 8 x 2.4 GHz CPU, 16 GiB of RAM and an SSD drive. Profiling the workflow and checking the resulting flamegraph in the case of JPEG XL revealed the following relative contributions to the computation time - debayering: 10%, segmenting: 30%, post-processing mask: 2%, compression: 58%. The memory usage was about the same for both compression schemes.
+I ran these tests on a modest laptop (Intel i5, 8 x 2.4 GHz CPU, 16 GiB RAM, SSD). Profiling the JPEG XL run shows the relative contribution to total computation time as: debayering ~10%, segmenting ~30%, mask post-processing ~2%, compression ~58%. Memory use was similar for both compression schemes.
 
-There are a couple of parameters that can be tuned:
+Tunable parameters:
 
-- Mask dilation iterations in the post-processing step
-  - A higher number decreases slightly the compression ratio, but decreases the probability of an incorrect segmentation. It has a relatively low impact on the computation time.
-- JPEG XL compression parameters: compression effort and decoding speed
-  - After testing all possible combinations I've settled on effort = 5 and speed = 0 which is a good compromise between the compression ratio and computation time.
-  - I've found [this](https://jpegxl.info/resources/distance-vs-effort-visualizer.html  target="_blank" rel="noopener noreferrer") to be a handy reference.
+- **Mask dilation iterations** (post-processing). More dilation reduces the risk of clipped foreground but slightly lowers the compression ratio. It has relatively little impact on compute time.
+- **JPEG XL parameters** (effort and decoding speed). After doing a parameter search I settled on `effort = 5` and `speed = 0` as a good compromise between compression ratio and CPU time. The [JPEG XL visualizer](https://jpegxl.info/resources/distance-vs-effort-visualizer.html target="_blank" rel="noopener noreferrer") is a useful reference when tuning these values.
 
-These parameters offer various space vs time vs reliability tradeoffs - like usually happens in algorithms in general.
+These parameters let you trade space vs. time vs. reliability. One optimization I did not test is running segmentation on a GPU, which could reduce overall processing time.
 
-One optimization I haven't tried is running the segmentation on a GPU which could slightly improve the overall speed.
-
-Another test I've done with JPEG XL was to skip the segmentation step to see how well the data would compress without it:
+I also tested JPEG XL without the segmentation step:
 
 **JPEG XL, without segmentation**
 
@@ -124,27 +122,29 @@ Another test I've done with JPEG XL was to skip the segmentation step to see how
   - Compressed size: 1 121 MiB
   - Ratio: 1.5:1
 - Time
-  - 80 seconds for 117 images, or 0.68 seconds per single image
-  - A single volumetric frame (70 x 12 megapixel cameras) would take 50 seconds to compress
-  - A volumetric second (24 fps) would take 20 minutes to compress
+  - 80 seconds for 117 images (≈ 0.68 s per image)
+  - A single volumetric frame (70 x 12 megapixel cameras) would take ≈ 50 seconds to compress
+  - A volumetric second (24 fps) would take ≈ 20 minutes to compress
 
-From this it's clear that the segmentation is key in providing the high compression ratio. But even without it it can be still a worthwhile effort in some edge cases - where segmentation could fail for various reasons.
+This makes clear that segmentation is the key to achieving the high (18:1) compression ratios. Even without segmentation, however, lossless compression can still be useful in some edge cases.
 
 # Results
 
-Overall I'm pretty happy with the results, they resulted in a far better compression ratio than I've initially hoped for. A compression ratio of **18:1** can have very positive effects on the downstream processing pipeline, including a cheaper storage, faster processing (because of faster I/O), lower load on the network infrastructure.
+Overall, the results exceeded my expectations. The pipeline produced a compression ratio of 18:1, which translates to lower storage costs, faster I/O, and cheaper downstream processing.
 
-During my tests I made sure that the resulting DNGs are valid according the specification (with the help of the Adobe DNG SDK), they carry over all of the metadata and that the compression is truly lossless (reading written pixels back and comparing with the input pixels and making sure that debayered foreground matches between uncompressed and compressed images). Any application using a recent version of the Adobe DNG SDK should accept the compressed raw DNGs without any changes - in the same way as it'd accept the uncompressed raw DNGs.
+I validated the output DNGs with the Adobe DNG SDK: the files are valid according to the specification, metadata is preserved, and the compression is lossless for the retained samples. I verified this by reading back written samples and comparing them to the input (and confirming that debayered foreground matches between uncompressed and compressed images). Any application using a recent Adobe DNG SDK should accept the compressed raw DNGs without changes - just as it accepts the uncompressed files.
 
 # Limitations
 
-While the resulting compression ratio looks very appealing, there are some considerations to keep in mind.
+There are a few caveats to keep in mind.
 
-I think the largest drawback of this method is the need for the extra step in the processing pipeline and the extensive computation needed for it. On the other hand the compression step is suitable for parallelization, so additional processing computers would almost linearly speed up the process - each computer processing a different set of images.
+- **Extra processing step.** The pipeline adds CPU work (compressing, segmentating, debayering and post-processing). That increases processing cost, but the process is highly parallelizable: adding more machines nearly linearly reduces processing time because each machine can process a different subset of images.
 
-Another potential limitation is the accuracy of segmentation, which might fail for certain captures - those including content that the segmentation cannot differentiate from the background. A workaround for that could be disabling segmentation for the problematic content (but still run the lossless compression for some modest size saving).
+- **Segmentation accuracy.** Off-the-shelf segmentation models can fail on uncommon foreground content (certain props, animals, or costumes). Workarounds include training a domain-specific segmentation model or disabling segmentation for problematic captures (you still get the benefit of lossless compression in that case, although with a lower ratio).
 
-When incorporating this compression pipeline into your workflow I'd recommend having two tiers of storage: cold (cheap, slow, large) for backing up the original uncompressed DNGs and the hot (expensive, fast, small) for storing the compressed files used for processing. Then in situations where the segmentation has turned out incorrect it's possible to fall back to the uncompressed files. This removes the risk associated with this process at the cost of extra file management. Whether this is viable depends on the content of captures and how good the segmentation is.
+- **Operational complexity.** I recommend a two-tier storage strategy: keep the original uncompressed DNGs in cold (cheap, slow, large) storage, and use the compressed files in hot (fast, expensive, small) storage for processing. If segmentation turns out to be incorrect for some captures, you can fall back to the original files. This approach reduces risk but does add file-management complexity.
+
+Whether this pipeline is worth integrating depends on your capture content and how reliable your segmentation is for that content. For many multi-view workflows, though, the storage and I/O savings make the extra processing step a worthwhile tradeoff.
 
 <!-- Markdeep: -->
 <script></script> 
