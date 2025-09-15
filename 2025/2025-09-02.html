@@ -108,8 +108,8 @@ I ran these tests on a modest laptop (Intel i5, 8 x 2.4 GHz CPU, 16 GiB RAM, SSD
 
 Tunable parameters:
 
-- **Mask dilation iterations** (post-processing). More dilation reduces the risk of clipped foreground but slightly lowers the compression ratio. It has relatively little impact on compute time.
-- **JPEG XL parameters** (effort and decoding speed). After doing a parameter search I settled on `effort = 5` and `speed = 0` as a good compromise between compression ratio and CPU time. The [JPEG XL visualizer](https://jpegxl.info/resources/distance-vs-effort-visualizer.html target="_blank" rel="noopener noreferrer") is a useful reference when tuning these values.
+- **Mask dilation iterations** (post-processing): More dilation reduces the risk of clipped foreground but slightly lowers the compression ratio. It has relatively little impact on compute time.
+- **JPEG XL parameters** (effort and decoding speed): After doing a parameter search I settled on `effort = 5` and `speed = 0` as a good compromise between compression ratio and CPU time. The [JPEG XL visualizer](https://jpegxl.info/resources/distance-vs-effort-visualizer.html target="_blank" rel="noopener noreferrer") is a useful reference when tuning these values.
 
 These parameters let you trade space vs. time vs. reliability. One optimization I did not test is running segmentation on a GPU, which could reduce overall processing time.
 
@@ -138,11 +138,11 @@ I validated the output DNGs with the Adobe DNG SDK: the files are valid accordin
 
 There are a few caveats to keep in mind.
 
-- **Extra processing step.** The pipeline adds CPU work (compressing, segmenting, debayering and post-processing). That increases processing cost, but the process is highly parallelizable: adding more machines nearly linearly reduces processing time because each machine can process a different subset of images.
+- **Extra processing step:** the pipeline adds CPU work (compressing, segmenting, debayering and post-processing). That increases processing cost, but the process is highly parallelizable: adding more machines nearly linearly reduces processing time because each machine can process a different subset of images.
 
-- **Segmentation accuracy.** Off-the-shelf segmentation models can fail on uncommon foreground content (certain props, animals, or costumes). Workarounds include training a domain-specific segmentation model or disabling segmentation for problematic captures (you still get the benefit of lossless compression in that case, although with a lower ratio).
+- **Segmentation accuracy:** off-the-shelf segmentation models can fail on uncommon foreground content (certain props, animals, or costumes). Workarounds include training a domain-specific segmentation model or disabling segmentation for problematic captures (you still get the benefit of lossless compression in that case, although with a lower ratio).
 
-- **Operational complexity.** I recommend a two-tier storage strategy: keep the original uncompressed DNGs in cold (cheap, slow, large) storage, and use the compressed files in hot (fast, expensive, small) storage for processing. If segmentation turns out to be incorrect for some captures, you can fall back to the original files. This approach reduces risk but does add file-management complexity.
+- **Operational complexity:** I recommend a two-tier storage strategy: keep the original uncompressed DNGs in cold (cheap, slow, large) storage, and use the compressed files in hot (fast, expensive, small) storage for processing. If segmentation turns out to be incorrect for some captures, you can fall back to the original files. This approach reduces risk but does add file-management complexity.
 
 Whether this pipeline is worth integrating depends on your capture content and how reliable your segmentation is for that content. For many multi-view workflows, though, the storage and I/O savings make the extra processing step a worthwhile tradeoff.
 
