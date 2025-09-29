@@ -19,7 +19,8 @@ SKIPLIST = [
     "https://www.fxguide.com",
     "https://www.kaggle.com",
     "https://helpx.adobe.com",
-    "https://www.virtra.com"
+    "https://www.virtra.com",
+    "medium.com/"
 ]
 
 
