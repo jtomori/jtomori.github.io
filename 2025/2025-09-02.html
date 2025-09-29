@@ -4,11 +4,11 @@
 **Efficient multi view data storage**
 [ <- ](..) _2025-09-02_
 
-Storage is a major headache for teams working with multi-view data, such as in the case of volumetric video. It limits how much content can be captured, it makes every step of the pipeline feel slow, and it's a large driver of costs. And the most annoying part is that in many setups the foreground can take up as little as ~20% of the image, with most pixels containing useless background information. In this post I explore practical ways of exploiting that observation in order to improve the overall process.
+Storage is a major headache for teams working with multi-view data, such as in the case of volumetric video. It limits how much content can be captured, it makes every step of the pipeline feel slow, and it's a large driver of costs. And the most annoying part is that in many setups the foreground can take up as little as 20% of the image, with the remaining majority of pixels containing useless background information. In this post I explore practical ways of exploiting that observation in order to improve the overall process.
 
 # TL;DR
 
-The key insight is that pipelines that handle compression early in the process, while aware of the downstream requirements of the pipeline, can discard large amounts of data with no impact on the final result quality.
+The key insight is that pipelines that handle compression early in the process, while aware of the downstream requirements of the pipeline, can discard large amounts of data with no impact on the final result's quality.
 
 The preprocessing pipeline below can achieve an **18:1** compression ratio on typical volumetric-video source footage. That reduces hardware requirements (or cloud storage costs) and speeds up the subsequent reconstruction. The process is lossless where it matters (the captured subject) and is invisible to downstream applications.
 
@@ -20,7 +20,9 @@ Into this dataset (raw compressed & segmented DNG, **92 MiB** in total):
 
 ![](images/sheet_out_censored_lq.jpg width="500px")
 
-Both datasets produce the same volumetric video after reconstruction, but the compressed version is much lighter to store and faster / cheaper to process. Keep reading if you find it as fascinating as I do and if you would like to learn more about the benefits, costs and tradeoffs tied to this optimization.
+Both datasets produce the same volumetric video after reconstruction, but the compressed version is much lighter to store and faster / cheaper to process.
+
+Keep reading if you find it as fascinating as I do and if you would like to learn more about the benefits, costs and tradeoffs tied to this optimization.
 
 !!! note
     *The multi-view dataset is courtesy of [IO Industries](https://www.ioindustries.com target="_blank" rel="noopener noreferrer"), used with permission, the face has been blurred for privacy*
@@ -48,7 +50,7 @@ Now that we understand what multi-view data looks like and how much storage it r
 
 ## Debayering
 
-Both the uncompressed input and the compressed output store raw Colour Filter Array samples (CFA - monochromatic sensor samples)[^debayering]. However, for accurate segmentation we need a temporary colour image, which is used only as an input into segmentation and is discarded afterwards.
+Both the uncompressed inputs and the compressed outputs store raw Colour Filter Array samples (CFA - monochromatic sensor samples)[^debayering]. However, for accurate segmentation we need a temporary colour image, which is used only as an input into segmentation and is discarded afterwards.
 
 We generate a temporary colour image by debayering, but only at half resolution and with modest quality. This lower quality debayering speeds up the debayering process without degrading segmentation quality.
 
@@ -66,7 +68,7 @@ In my tests, half-resolution debayered images produced the same masks as full re
 
 Note: segmentation quality depends on the model's training data. It can miss unusual foreground content (animals, props, unusual clothing). This can be improved by training a domain-specific segmentation model using previously reconstructed frames as ground truth.
 
-[^segmenting]: _Alternative approaches include difference or, depth-based approaches - each with its own set of pros and cons. The takeaway here is that an accurate segmentation is required. Specifically which one depends on the content, accuracy / speed requirements and so on._
+[^segmenting]: _Alternative approaches include difference or, depth-based approaches - each with its own set of pros and cons. The takeaway here is that an accurate segmentation is required. Specifically which one depends on the content, accuracy / speed requirements, which falls outside of this post's scope._
 
 ## Mask post-processing
 
@@ -100,7 +102,7 @@ Now that the workflow is described, here are numbers that show the space savings
   - Compression ratio: 18:1
 - Processing time
   - 98 seconds for 117 images (≈ 0.84 s per image)
-  - A single volumetric frame (70 x 12 megapixel cameras) would take ≈ minute to process
+  - A single volumetric frame (70 x 12 megapixel cameras) would take ≈ 1 minute to process
   - A volumetric second (24 fps) would take ≈ 24 minutes to process
 
 **JPEG**
@@ -136,19 +138,19 @@ I also tested JPEG XL without the segmentation step:
   - A single volumetric frame (70 x 12 megapixel cameras) would take ≈ 50 seconds to process
   - A volumetric second (24 fps) would take ≈ 20 minutes to process
 
-This makes it clear that segmentation is the key to achieving the high (18:1) compression ratios. Even without segmentation, however, lossless compression can still be useful in some edge cases.
+This makes it clear that segmentation is the key to achieving the high (18:1) compression ratio. Even without segmentation, however, lossless compression can still be useful in some edge cases.
 
 ## Speeding it up
 
-Requiring 24 minutes of processing for each volumetrically captured second will probably not be acceptable in many production settings, especially those requiring quick turnarounds. The following optimizations can bring the processing time to under a single minute.
+Requiring 24 minutes of processing for each volumetrically captured second will probably not be acceptable in many production settings, especially those requiring quick turnarounds. The combination of the following optimizations can bring the processing time to under a single minute.
 
-- **Tuning JPEG XL parameters:** we could tradeoff a minor reduction of compression ratio in favor of a faster processing. This is driven by the fact that the JPEG XL compression requires most of the computation time.
+- **Tuning JPEG XL parameters:** we could tradeoff a minor reduction of compression ratio in favor of a faster processing. This is driven by the fact that the JPEG XL compression step requires most of the computation time.
 - **Optimizing segmentation:** running the segmentation on a GPU should speed up the segmentation step, improving the overall performance.
-- **Distributed processing:** utilizing the existing render farm (which is used for reconstruction), e.g. 10 nodes can deliver ≈ 10x speedup.
+- **Distributed processing:** utilizing a render farm (e.g. the same which would be used for reconstruction), e.g. 10 nodes can deliver ≈ 10x speedup.
 
-In a such case a volumetric minute would take an hour of pre-processing. The downstream reconstruction speedup might mean that this would result in a net speedup. Given the additional cost savings this would make a compelling argument for a such change of workflow.
+In a such case a volumetric minute would take an hour of pre-processing. The downstream reconstruction speedup might mean that this would result in a net speedup. Given the additional cost savings this would make a compelling argument for implementing it into the workflow.
 
-An interesting idea for future work is employing a faster lossless compression that could make it a near-realtime pre-processing workflow. That might be still very valuable even if it'd decrease the compression ratio to 10:1 or lower at the cost of faster compression.
+An interesting idea for future work is employing a faster lossless compression that could make it a near-realtime pre-processing workflow. That might be still very valuable even if it'd decrease the compression ratio to 10:1 or lower at the cost of significantly faster compression.
 
 [^storage]: _See the [Limitations](#limitations) section below for more details about a cold/hot storage._
 
@@ -156,21 +158,21 @@ An interesting idea for future work is employing a faster lossless compression t
 
 Overall, the results exceeded my expectations. The pipeline produced a compression ratio of 18:1, which translates to lower storage costs, faster I/O, and cheaper downstream processing.
 
-I validated the output DNGs with the Adobe DNG SDK: the files are valid according to the specification, metadata is preserved, and the compression is lossless for the retained samples. I verified this by reading back written samples and comparing them to the input (and confirming that debayered foreground matches between uncompressed and compressed images). Any application using a recent Adobe DNG SDK should accept the compressed raw DNGs without changes - just as it accepts the uncompressed files.
+I validated the output DNGs with the Adobe DNG SDK: the files are valid according to the specification, metadata are preserved, and the compression is lossless for the retained samples. I verified this by reading back written samples and comparing them to the input (and confirming that debayered foreground matches between uncompressed and compressed images). Any application using a recent Adobe DNG SDK should accept the compressed raw DNGs without changes - just as it accepts the uncompressed files.
 
 # Limitations
 
 There are a few caveats and tradeoffs to keep in mind.
 
-- **Extra processing step:** the pipeline increases compute requirements (compressing, segmenting, debayering and post-processing). That increases processing cost, but the process is highly parallelizable: adding more machines nearly linearly reduces processing time because each machine can process a different subset of images. With some optimizations this could result in net speedups which would make it well worth the effort.
+- **Extra processing step:** the pipeline increases compute requirements (compressing, segmenting, debayering and post-processing). That increases processing cost, but the process is highly parallelizable: adding more machines nearly linearly reduces processing time because each machine can process a different subset of images. With [the aforementioned](#howfastisit,howsmallcanitget/speedingitup) optimizations this could result in net speedups which would make it well worth the effort.
 
 - **Segmentation accuracy:** off-the-shelf segmentation models can fail on uncommon foreground content (certain props, animals, or costumes). Workarounds include training a domain-specific segmentation model or disabling segmentation for problematic captures (you still get the benefit of lossless compression in that case, although with a lower ratio).
 
-- **Operational complexity:** I recommend a two-tier storage strategy: keep the original unsegmented DNGs (either compressed or uncompressed, depending on the usual constraints) in cold (cheap, slow, large) storage, and use the segmented and compressed files in hot (fast, expensive, small) storage for reconstruction. If segmentation turns out to be incorrect for some captures, you can fall back to the original unsegmented files. This approach reduces risk, still offers some of the benefits at the cost of added file-management complexity.
+- **Operational complexity:** I recommend a two-tier storage strategy: keep the original unsegmented DNGs (either compressed or uncompressed, depending on the usual speed vs space constraints) in cold (slow, large, cheap) storage, and use the segmented and compressed files in hot (fast, small, expensive) storage for reconstruction. If segmentation turns out to be incorrect for some captures, you can fall back to the original unsegmented files. This approach removes the risk of data loss, but still offers some of the benefits at the cost of added file-management complexity.
 
-Whether this pipeline is worth integrating depends on your capture content, available storage, turnaround time and how reliable your segmentation is for that content. For many multi-view workflows, though, the storage and I/O savings make the extra processing step a worthwhile tradeoff.
+Whether this pipeline is worth integrating depends on your capture content, available storage, turnaround time and how reliable your segmentation is for your content. However I believe that for many multi-view workflows, though, the storage savings and I/O speed up make the extra processing step a worthwhile investment.
 
-One thing to keep in mind is that this is influenced by the systems I have experience with and not all aspect might apply to different companies, studios. I am sure that other settings might have equally interesting areas for improvement.
+One thing to keep in mind is that this work is influenced by the systems I have experience with and not all aspects might necessarily apply to different companies, studios. I am sure that other settings might have equally interesting areas for improvement.
 
 <!-- Markdeep: -->
 <script></script> 
