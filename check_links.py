@@ -31,9 +31,11 @@ def get_status(link):
             return True, 0
 
     try:
-        status = requests.head(link, timeout=15, headers={"User-Agent": AGENT}, allow_redirects=True).status_code
+        status = requests.head(link, timeout=60, headers={"User-Agent": AGENT}, allow_redirects=True).status_code
     except requests.exceptions.SSLError:  # In case of failed certificate verification try without
-        status = requests.head(link, timeout=15, headers={"User-Agent": AGENT}, allow_redirects=True, verify=False).status_code
+        status = requests.head(link, timeout=60, headers={"User-Agent": AGENT}, allow_redirects=True, verify=False).status_code
+    except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout):  # In case of timeout
+        status = "timed out"
     except:
         print(f"Unhandled exception during request to: {link}")
         raise
