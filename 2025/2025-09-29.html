@@ -152,6 +152,9 @@ In such a setup, a volumetric minute would take about an hour to pre-process. Th
 
 An interesting idea for future work is employing a faster lossless compression that could make this a near-realtime preprocessing workflow. That could still be valuable even if the compression ratio dropped to ~10:1 or lower.
 
+!!! note
+    *Meta has just released their [OpenZL](https://openzl.org target="_blank" rel="noopener noreferrer") lossless compression framework, which supports domain-specific compressors. It would be really interesting to see how it compares to my results!*
+
 # Results
 
 Overall, the results exceeded my expectations. The pipeline achieved an 18:1 compression ratio, translating into lower storage costs, faster I/O, and cheaper downstream processing.
